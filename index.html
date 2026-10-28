@@ -1,0 +1,1111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RFQ 智能报价平台 · 可点击演示</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+/* 布局：工程图纸感的内网业务系统。顶部条 + 体验路线条；左侧导航，右侧工作区；报价单详情用“原文 | 清单”左右分栏，窄屏上下堆叠 */
+:root{
+  --bg:#edf0f3; --surface:#ffffff; --surface-2:#f5f7f9; --line:#d4dbe2; --line-strong:#b5c0cb;
+  --fg:#16202a; --muted:#5b6876; --accent:#1c4f8f; --accent-fg:#ffffff; --accent-soft:#e1eaf6;
+  --ai:#0b7275; --ai-soft:#dff1f0;
+  --red:#b3352a; --red-soft:#fbe7e4; --amber:#9c640f; --amber-soft:#fcf0d9; --green:#28734a; --green-soft:#e2f1e7;
+  --hl:#ffeb8a; --shadow:0 6px 24px rgba(20,32,45,.14);
+  --font:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151b; --surface:#171e27; --surface-2:#1d2631; --line:#2a3644; --line-strong:#3c4b5c;
+    --fg:#e3e9ef; --muted:#93a1b0; --accent:#78a9ea; --accent-fg:#0d1622; --accent-soft:#1b2c42;
+    --ai:#5cc7c3; --ai-soft:#15302f;
+    --red:#ef8073; --red-soft:#3a1f1c; --amber:#e3b25b; --amber-soft:#382c16; --green:#6dc493; --green-soft:#183224;
+    --hl:#5b4a10; --shadow:0 6px 24px rgba(0,0,0,.45); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151b; --surface:#171e27; --surface-2:#1d2631; --line:#2a3644; --line-strong:#3c4b5c;
+  --fg:#e3e9ef; --muted:#93a1b0; --accent:#78a9ea; --accent-fg:#0d1622; --accent-soft:#1b2c42;
+  --ai:#5cc7c3; --ai-soft:#15302f;
+  --red:#ef8073; --red-soft:#3a1f1c; --amber:#e3b25b; --amber-soft:#382c16; --green:#6dc493; --green-soft:#183224;
+  --hl:#5b4a10; --shadow:0 6px 24px rgba(0,0,0,.45); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+.shell{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px;max-width:1440px;margin:0 auto}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+h1,h2,h3{text-wrap:balance;margin:0}
+h1{font-size:20px;font-weight:700;letter-spacing:.01em}
+h2{font-size:16px;font-weight:700}
+h3{font-size:14px;font-weight:700}
+p{margin:0}
+
+/* 顶部 */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px))}
+.top-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand b{font-size:17px;letter-spacing:.04em}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line-strong);color:var(--muted);white-space:nowrap}
+.top .spacer{flex:1}
+.notice{font-size:12px;color:var(--muted)}
+
+/* 体验路线条 */
+.tour{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.tour-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 14px}
+.tour-bar{flex:1;min-width:120px;height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.tour-bar i{display:block;height:100%;background:var(--accent)}
+.tour-steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;padding:0 14px 12px}
+.tstep{display:flex;gap:8px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:var(--r);padding:7px 9px}
+.tstep .n{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-family:var(--mono);border:1px solid var(--line-strong);color:var(--muted)}
+.tstep.done .n{background:var(--green);border-color:var(--green);color:var(--surface)}
+.tstep.next{border-color:var(--accent);background:var(--accent-soft)}
+.tstep.next .n{border-color:var(--accent);color:var(--accent)}
+
+/* 主体布局 */
+.app{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;margin-top:16px;align-items:start}
+.nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px);display:flex;flex-direction:column;gap:2px}
+.nav .grp{font-size:11px;color:var(--muted);letter-spacing:.08em;margin:12px 8px 4px}
+.nav button{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;border:0;background:none;padding:8px 10px;border-radius:var(--r)}
+.nav button:hover{background:var(--surface)}
+.nav button.on{background:var(--surface);box-shadow:inset 3px 0 0 var(--accent);font-weight:500}
+.badge{font-family:var(--mono);font-size:11px;min-width:18px;padding:0 6px;border-radius:999px;background:var(--red);color:var(--surface);text-align:center}
+.main{min-width:0;display:flex;flex-direction:column;gap:16px}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .nav{position:static;flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:4px}
+  .nav .grp{display:none}
+  .nav button{white-space:nowrap;background:var(--surface)}
+  .nav button.on{box-shadow:inset 0 -3px 0 var(--accent)}
+}
+
+/* 通用组件 */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.card-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.card-b{padding:14px 16px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.stack{display:flex;flex-direction:column;gap:10px}
+.btn{border:1px solid var(--line-strong);background:var(--surface);border-radius:var(--r);padding:6px 12px;line-height:1.3;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:500}
+.btn.sm{padding:3px 9px;font-size:12px}
+.btn.warn{border-color:var(--amber);color:var(--amber)}
+.btn:disabled{opacity:.45;cursor:not-allowed;border-color:var(--line)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:1px 8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);white-space:nowrap}
+.chip.red{background:var(--red-soft);border-color:transparent;color:var(--red)}
+.chip.amber{background:var(--amber-soft);border-color:transparent;color:var(--amber)}
+.chip.green{background:var(--green-soft);border-color:transparent;color:var(--green)}
+.chip.blue{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.ai{display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:0 6px;border-radius:3px;background:var(--ai-soft);color:var(--ai);font-weight:500;white-space:nowrap}
+.ai::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ai)}
+.note{font-size:12px;color:var(--muted);background:var(--surface-2);border:1px dashed var(--line-strong);border-radius:var(--r);padding:8px 10px}
+.scroll-x{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+.t th{font-weight:500;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;font-size:12px}
+.t td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.t tr.click{cursor:pointer}
+.t tr.click:hover td{background:var(--surface-2)}
+.t td.num,.t th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+input.in,select.in,textarea.in{border:1px solid var(--line-strong);background:var(--surface);border-radius:4px;padding:4px 7px;min-width:0}
+input.in.num{width:84px;text-align:right;font-family:var(--mono)}
+input.in.err{border-color:var(--red);background:var(--red-soft)}
+input.in.warn{border-color:var(--amber);background:var(--amber-soft)}
+textarea.in{width:100%;min-height:72px;resize:vertical}
+.flash{animation:flash 1.6s ease-out 2}
+@keyframes flash{0%{background:var(--hl)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.flash{animation:none;background:var(--hl)}}
+
+/* 详情页 */
+.qhead{display:flex;gap:14px;flex-wrap:wrap;align-items:baseline}
+.steps{display:flex;gap:0;overflow-x:auto;padding:12px 16px}
+.st{flex:1;min-width:76px;text-align:center;font-size:12px;color:var(--muted);position:relative;padding-top:18px}
+.st::before{content:"";position:absolute;top:6px;left:0;right:0;height:2px;background:var(--line)}
+.st::after{content:"";position:absolute;top:2px;left:calc(50% - 5px);width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--line-strong)}
+.st.done::before,.st.cur::before{background:var(--accent)}
+.st.done::after{background:var(--accent);border-color:var(--accent)}
+.st.cur{color:var(--fg);font-weight:500}
+.st.cur::after{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 3px var(--accent-soft)}
+.tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);padding:0 8px}
+.tabs button{border:0;background:none;padding:10px 12px;white-space:nowrap;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--fg);border-bottom-color:var(--accent);font-weight:500}
+.tabs button .badge{margin-left:4px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:0}
+.split>div{min-width:0}
+.pane{max-height:640px;overflow:auto;position:relative}
+.pane+.pane{border-left:1px solid var(--line)}
+@media (max-width:1000px){.split{grid-template-columns:minmax(0,1fr)}.pane+.pane{border-left:0;border-top:1px solid var(--line)}.pane{max-height:420px}}
+.page{padding:14px 18px;border-bottom:1px dashed var(--line);font-family:Georgia,"Times New Roman","Noto Serif SC",serif;font-size:14px;line-height:1.7}
+.page .ph{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:4px;letter-spacing:.04em}
+.page .zh{font-family:var(--font);font-size:13px;color:var(--muted);margin-top:6px;border-left:2px solid var(--line-strong);padding-left:8px}
+.seg{border-radius:2px;transition:background .2s}
+.seg.mark{border-bottom:1px dotted var(--line-strong)}
+.seg.hl{background:var(--hl)}
+.grp-h{display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--surface-2);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:1}
+.req{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.req:hover{background:var(--surface-2)}
+.req.on{background:var(--accent-soft)}
+.req .id{font-family:var(--mono);font-size:12px;color:var(--muted);padding-top:1px}
+.req .orig{grid-column:2/4;font-size:12px;color:var(--muted);font-family:Georgia,"Times New Roman",serif}
+.req .acts{display:flex;gap:4px;align-items:flex-start}
+.req.deleted{opacity:.45}
+.req.deleted .sum{text-decoration:line-through}
+.cbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line);background:var(--surface-2)}
+.ck{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:9px 14px;border-bottom:1px solid var(--line);align-items:center}
+.ck .r{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.ck.miss{background:var(--red-soft)}
+.ck.miss.done{background:transparent}
+.cl{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.cl .ask{font-family:Georgia,"Times New Roman",serif;font-size:13px;color:var(--muted);border-left:2px solid var(--line-strong);padding-left:8px}
+.cl.deleted{opacity:.45}
+.draw svg{width:100%;height:auto;display:block;background:var(--surface-2)}
+.draw .ln{stroke:var(--fg);stroke-width:1.4;fill:none}
+.draw .thin{stroke:var(--muted);stroke-width:.8;fill:none}
+.draw .txt{fill:var(--fg);font-family:var(--mono);font-size:11px}
+.draw .txt.s{font-size:9px;fill:var(--muted)}
+.draw .box{fill:var(--accent);fill-opacity:.12;stroke:var(--accent);stroke-width:2}
+.fld{display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:8px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.fld:hover,.fld.on{background:var(--accent-soft)}
+.fld.low{background:var(--amber-soft)}
+.fld.low.on{background:var(--accent-soft)}
+
+/* 成本核算 */
+.cost-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+@media (max-width:1100px){.cost-grid{grid-template-columns:minmax(0,1fr)}}
+.price{font-family:var(--mono);font-size:30px;font-weight:600;letter-spacing:-.01em}
+.bd{display:grid;grid-template-columns:auto 1fr auto;gap:5px 10px;align-items:center;font-size:13px}
+.bd .bar{height:8px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+.bd .bar i{display:block;height:100%;background:var(--accent)}
+.rule{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.rule:last-child{border-bottom:0}
+.rule .code{font-family:var(--mono);font-size:11px;color:var(--muted);flex:none;width:38px;padding-top:2px}
+.sim{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:5px}
+.sim.on{background:var(--accent-soft)}
+.mini{display:flex;height:7px;border-radius:2px;overflow:hidden;background:var(--surface-2)}
+.mini i:nth-child(1){background:var(--accent)} .mini i:nth-child(2){background:var(--ai)} .mini i:nth-child(3){background:var(--amber)} .mini i:nth-child(4){background:var(--muted)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:-1px;background:var(--c)}
+.jnode{border:1px solid var(--amber);background:var(--amber-soft);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.jnode.ok{border-color:var(--line);background:var(--surface-2)}
+
+/* 看板 */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:700px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.kpi b{display:block;font-family:var(--mono);font-size:26px;font-weight:600;line-height:1.2}
+.kpi.red b{color:var(--red)} .kpi.amber b{color:var(--amber)}
+.kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:10px;overflow-x:auto;padding:14px 16px}
+.col{display:flex;flex-direction:column;gap:6px}
+.col-h{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;border-bottom:2px solid var(--line);padding-bottom:4px}
+.qc{border:1px solid var(--line);border-radius:4px;padding:7px 8px;background:var(--surface-2);font-size:12px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.qc:hover{border-color:var(--accent)}
+.qc.r{border-left:3px solid var(--red)} .qc.y{border-left:3px solid var(--amber)}
+.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.charts{grid-template-columns:minmax(0,1fr)}}
+svg.ch{width:100%;height:auto;display:block}
+svg.ch.bars{max-width:640px}
+svg.ch .ax{stroke:var(--line);stroke-width:1}
+svg.ch .lab{fill:var(--muted);font-size:11px;font-family:var(--mono)}
+svg.ch .labt{fill:var(--fg);font-size:12px;font-family:var(--font)}
+svg.ch .line{stroke:var(--accent);stroke-width:2.2;fill:none}
+svg.ch .area{fill:var(--accent);fill-opacity:.08;stroke:none}
+svg.ch .dot{fill:var(--accent)}
+svg.ch .tgt{stroke:var(--green);stroke-width:1.4;stroke-dasharray:5 4}
+svg.ch .base{stroke:var(--muted);stroke-width:1;stroke-dasharray:2 3}
+svg.ch .bar{fill:var(--accent)}
+svg.ch .bar.warn{fill:var(--amber)}
+svg.ch .hit{fill:transparent;cursor:pointer}
+.eff td.ok{color:var(--green)} .eff td.near{color:var(--amber)}
+
+/* 弹窗和提示 */
+.modal-bg{position:fixed;inset:0;background:rgba(10,16,24,.45);z-index:40;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);width:min(720px,100%);max-height:86vh;display:flex;flex-direction:column}
+.modal .card-b{overflow:auto}
+.modal pre{font-family:var(--mono);font-size:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:10px;white-space:pre-wrap;word-break:break-all;margin:0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:13px;z-index:50;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+.mail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:1000px){.mail{grid-template-columns:minmax(0,1fr)}}
+.mailbox{font-size:13px;display:flex;flex-direction:column;gap:6px}
+.mailbox .body{font-family:Georgia,"Times New Roman",serif;background:var(--surface-2);border-radius:4px;padding:10px 12px;border:1px solid var(--line)}
+.parse li{display:flex;gap:8px;align-items:center;padding:4px 0;color:var(--muted)}
+.parse li.done{color:var(--fg)}
+.parse li.cur{color:var(--accent);font-weight:500}
+.parse ul{list-style:none;margin:0;padding:0}
+</style>
+
+<div class="shell">
+  <header class="top">
+    <div class="top-row">
+      <div class="brand"><b>RFQ 智能报价平台</b><span class="tag">原型 · 示例数据</span></div>
+      <span class="notice">AI 结果都是预设的示例，不调用真实模型；今天按 2026-10-27 算。</span>
+      <span class="spacer"></span>
+      <button class="btn sm" data-a="reset">重新开始</button>
+    </div>
+  </header>
+  <section class="tour" id="tour"></section>
+  <div class="app">
+    <nav class="nav" id="nav" aria-label="主导航"></nav>
+    <main class="main" id="main"></main>
+  </div>
+</div>
+<div id="modal"></div>
+<div id="toast" hidden></div>
+
+<script>
+(function(){
+const $ = (s, el) => (el || document).querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fx2 = n => (Math.round(n * 100) / 100).toLocaleString('zh-CN', {minimumFractionDigits:2, maximumFractionDigits:2});
+const STATES = ['待确认登记','待分级','解析中','待确认要求','技术评审','核算中','待审批','已提交','谈判中','结束'];
+
+/* ---------- 示例数据 ---------- */
+const QUOTES0 = [
+  {id:'Q2610-021',cust:'客户A',proj:'某车型转向管柱总成',type:'新项目',pri:'高',st:5,owner:'C3',due:'10-28',rem:1,stay:4},
+  {id:'Q2610-018',cust:'客户B',proj:'某平台改款',type:'工程变更',pri:'中',st:6,owner:'S1',due:'10-29',rem:2,stay:1},
+  {id:'Q2610-008',cust:'客户B',proj:'某车型改款',type:'工程变更',pri:'中',st:5,owner:'C4',due:'10-30',rem:3,stay:3},
+  {id:'Q2610-015',cust:'客户C',proj:'某车型转向中间轴',type:'新项目',pri:'中',st:4,owner:'E1',due:'11-02',rem:4,stay:2},
+  {id:'Q2610-010',cust:'客户D',proj:'某平台预询价',type:'比价',pri:'低',st:3,owner:'S3',due:'11-04',rem:6,stay:1},
+  {id:'Q2610-012',cust:'客户A',proj:'某平台转向管柱',type:'新项目',pri:'高',st:8,owner:'S2',due:'—',rem:null,stay:5},
+  {id:'Q2610-006',cust:'客户C',proj:'某平台转向管柱',type:'新项目',pri:'中',st:7,owner:'S2',due:'—',rem:null,stay:2},
+  {id:'Q2610-003',cust:'客户E',proj:'某车型改款',type:'工程变更',pri:'低',st:9,owner:'S2',due:'—',rem:null,stay:0,result:'已定点'}
+];
+const NEWQ = {id:'Q2610-024',cust:'客户D',proj:'某新能源车型转向管柱总成',type:'新项目',pri:'高',st:0,owner:'S2',due:'11-12',rem:12,stay:0,live:true};
+
+const PAGES = [
+  {p:12,sec:'3 Performance',segs:[['3.2 Adjustment. '],['The column shall provide a minimum rake adjustment range of ±25 mm.','R001'],[' The adjustment lever shall be operable with one hand.']],zh:'3.2 调节。转向管柱的倾角调节范围应不小于 ±25 mm。调节手柄应能单手操作。'},
+  {p:13,sec:'3 Performance',segs:[['3.4 Crash performance. '],['The collapse load shall be between 4.0 kN and 6.0 kN.','R002'],[' Energy absorption curves shall be submitted with the quotation.']],zh:'3.4 碰撞性能。溃缩力应在 4.0 kN 至 6.0 kN 之间。报价时应提交能量吸收曲线。'},
+  {p:21,sec:'4 Materials',segs:[['4.1 Materials. '],['Steering shaft material: 42CrMo4 or an equivalent approved by the customer.','R007']],zh:'4.1 材料。转向轴材料：42CrMo4，或经客户认可的等效材料。'},
+  {p:22,sec:'4 Materials',segs:[['4.3 Surface protection. '],['All steel parts shall be zinc-nickel plated with a minimum thickness of 8 µm.','R008']],zh:'4.3 表面防护。所有钢制零件应镀锌镍，厚度不小于 8 µm。'},
+  {p:30,sec:'4 Materials',segs:[['4.8 Restricted substances. '],['The supplier shall comply with the customer restricted substances list RSL-2025.','R009']],zh:'4.8 禁用物质。供应商应遵守客户禁用物质清单 RSL-2025。'},
+  {p:31,sec:'4 Materials',segs:[['4.9 Material data. '],['Material data shall be submitted through the material data system before production approval.','R010']],zh:'4.9 材料数据。量产批准前，应通过材料数据系统提交材料数据。'},
+  {p:42,sec:'5 Validation',segs:[['5.3 Durability. '],['The steering column assembly shall withstand 200,000 cycles of durability test under the conditions defined in Annex C.','R003']],zh:'5.3 耐久。转向管柱总成应通过 200,000 次耐久试验，试验条件见附录 C。'},
+  {p:43,sec:'5 Validation',segs:[['5.4 Environment. '],['Operating temperature range: −40 °C to +85 °C.','R004'],[' Humidity requirements: see project-specific annex (to be issued).']],zh:'5.4 环境。工作温度范围：−40 °C 至 +85 °C。湿度要求：见项目专用附件（待发布）。'},
+  {p:44,sec:'5 Validation',segs:[['5.6 Corrosion. '],['Corrosion resistance: 480 h neutral salt spray without red rust.','R016']],zh:'5.6 腐蚀。耐腐蚀：中性盐雾 480 h 无红锈。'},
+  {p:47,sec:'5 Validation',segs:[['5.9 Noise. '],['Noise during adjustment shall not exceed 35 dB(A) at 1 m.','R005']],zh:'5.9 噪声。调节时噪声在 1 m 处不超过 35 dB(A)。'},
+  {p:55,sec:'6 Quality',segs:[['6.1 Quality target. '],['Quality target: below 10 ppm from six months after start of production.','R011']],zh:'6.1 质量目标。量产六个月后，质量目标低于 10 ppm。'},
+  {p:56,sec:'6 Quality',segs:[['6.3 Special characteristics. '],['Special characteristics shall be marked on drawings with the symbol ◆.','R012']],zh:'6.3 特殊特性。特殊特性应在图纸上用 ◆ 标注。'},
+  {p:60,sec:'7 Delivery',segs:[['7.1 Samples. '],['B-samples shall be delivered within 16 weeks after nomination.','R013']],zh:'7.1 样件。B 样件应在定点后 16 周内交付。'},
+  {p:61,sec:'7 Delivery',segs:[['7.4 Spare parts. '],['Spare parts supply shall be guaranteed for 15 years after end of production.','R014']],zh:'7.4 备件。停产后应保证 15 年的备件供应。'},
+  {p:64,sec:'8 Commercial',segs:[['8.2 Commercial documents. '],['The supplier shall provide a cost breakdown using customer template CBD-07.','R015'],[' Template CBD-07 will be sent separately.']],zh:'8.2 商务文件。供应商应按客户模板 CBD-07 提交成本分解。模板 CBD-07 另行发送。'},
+  {p:118,sec:'Annex C',segs:[['Annex C — Durability test conditions. '],['Durability cycles shall be run at 23 °C ± 5 °C with a load of 300 N.','R006'],[' Table C-2 lists 150,000 cycles for carry-over parts.']],zh:'附录 C 耐久试验条件。耐久循环在 23 °C ± 5 °C、载荷 300 N 下进行。表 C-2 中沿用件为 150,000 次。'}
+];
+const CATS = ['性能','材料','法规和环保','测试验证','质量','交付','其他'];
+const REQS0 = [
+  {id:'R001',cat:'性能',sum:'倾角调节范围不小于 ±25 mm',p:12,key:false},
+  {id:'R002',cat:'性能',sum:'溃缩力 4.0–6.0 kN',p:13,key:false},
+  {id:'R003',cat:'测试验证',sum:'耐久试验 200,000 次，条件见附录 C',p:42,key:true},
+  {id:'R004',cat:'测试验证',sum:'工作温度 −40 °C ~ +85 °C',p:43,key:true},
+  {id:'R016',cat:'测试验证',sum:'中性盐雾 720 h 无红锈',p:44,key:false,suspect:true,bad:'Salt spray resistance shall be 720 h without red rust.',fix:'中性盐雾 480 h 无红锈'},
+  {id:'R005',cat:'测试验证',sum:'调节噪声 1 m 处不超过 35 dB(A)',p:47,key:true},
+  {id:'R006',cat:'测试验证',sum:'耐久试验条件：23 °C ± 5 °C，载荷 300 N',p:118,key:true,src:'引用条款展开'},
+  {id:'R007',cat:'材料',sum:'转向轴材料 42CrMo4，或客户认可的等效材料',p:21,key:true},
+  {id:'R008',cat:'材料',sum:'钢件镀锌镍，厚度不小于 8 µm',p:22,key:true},
+  {id:'R009',cat:'法规和环保',sum:'遵守客户禁用物质清单 RSL-2025',p:30,key:true},
+  {id:'R010',cat:'法规和环保',sum:'量产批准前提交材料数据',p:31,key:true},
+  {id:'R011',cat:'质量',sum:'量产 6 个月后质量目标低于 10 ppm',p:55,key:true},
+  {id:'R012',cat:'质量',sum:'特殊特性在图纸上用 ◆ 标注',p:56,key:true},
+  {id:'R013',cat:'交付',sum:'B 样件定点后 16 周内交付',p:60,key:true},
+  {id:'R014',cat:'交付',sum:'停产后备件供应 15 年',p:61,key:true},
+  {id:'R015',cat:'其他',sum:'按客户模板 CBD-07 提交成本分解表',p:64,key:false}
+];
+const CHECK_CATS = ['测试验证','法规和环保','材料','包装物流','质量','交付'];
+const CHECKS0 = [
+  ['测试验证','耐久试验的次数和条件','R003 · p.42'],['测试验证','高低温试验范围','R004 · p.43'],['测试验证','湿热试验',null],['测试验证','盐雾试验','R016 · p.44'],
+  ['测试验证','振动试验','p.45'],['测试验证','电磁兼容要求','p.46'],['测试验证','噪声要求','R005 · p.47'],['测试验证','是否引用了“需关注标准”','p.48：引用 2 项'],
+  ['法规和环保','禁用物质要求','R009 · p.30'],['法规和环保','材料数据申报','R010 · p.31'],['法规和环保','回收利用要求','p.32'],['法规和环保','有害物质限值','p.30'],['法规和环保','功能安全要求','p.33'],['法规和环保','网络安全要求',null],
+  ['材料','是否指定材料牌号','R007 · p.21'],['材料','材料认证要求','p.21'],['材料','热处理要求','p.23'],['材料','表面处理要求','R008 · p.22'],['材料','润滑脂指定','p.24'],['材料','橡胶件材料要求',null],
+  ['包装物流','包装方式','p.66'],['包装物流','是否要求可回收料箱',null],['包装物流','每箱数量',null],['包装物流','标签要求',null],['包装物流','运输条件','p.67'],['包装物流','存储条件','p.67'],
+  ['质量','质量目标','R011 · p.55'],['质量','特殊特性的标注','R012 · p.56'],['质量','样件阶段的质量文件','p.57'],['质量','过程能力要求','p.57'],['质量','追溯要求','p.58'],['质量','首件检验','p.58'],['质量','变更通知要求','p.59'],
+  ['交付','样件交付时间','R013 · p.60'],['交付','量产开始时间','p.5'],['交付','量产产能要求','p.6'],['交付','备件供应年限','R014 · p.61'],['交付','交付地点和条款','p.62'],['交付','开发节点计划','p.7'],['交付','年产量和生命周期','p.5']
+].map((c,i) => ({id:'K'+String(i+1).padStart(2,'0'),cat:c[0],name:c[1],ref:c[2],res:c[2] ? 'found' : 'missing',act:null,why:''}));
+const MISS_HINT = {'湿热试验':'规范第 43 页只写“湿度要求见项目专用附件（待发布）”，文件包里没有这个附件','网络安全要求':'这份询价是机械转向管柱，不含电控单元','橡胶件材料要求':'这次询价范围不含防尘罩等橡胶件','是否要求可回收料箱':'正文没有；可能在物流说明里','每箱数量':'正文没有；可能在物流说明里','标签要求':'正文没有；可能在物流说明里'};
+
+const CLARS0 = [
+  {id:'C1',kind:'需澄清',reqs:'登记信息',q:'截止日期两处说法不一致：邮件正文写“kick-off 后两周”，附件写 11 月 12 日。',ask:'Could you please confirm the quotation due date? The e-mail says two weeks after kick-off, while the RFQ letter states 12 Nov.',owner:'商务'},
+  {id:'C2',kind:'需澄清',reqs:'R003、R006',q:'正文写耐久 200,000 次；附录 C 表 C-2 写沿用件 150,000 次。本项目的输入轴按哪个执行？',ask:'Section 5.3 requires 200,000 cycles, while Table C-2 lists 150,000 cycles for carry-over parts. Which value applies to the input shaft?',owner:'商务'},
+  {id:'C3',kind:'需澄清',reqs:'R005',q:'噪声只写了 35 dB(A)，没写测试工况（调节速度、背景噪声）。',ask:'Please specify the test conditions for the 35 dB(A) adjustment noise limit (adjustment speed, background noise).',owner:'商务'},
+  {id:'C4',kind:'可能偏差',reqs:'R011',q:'质量目标 10 ppm 严于我方同类项目的常见目标，请工程师判断是否需要提出偏差。AI 不判断能不能做到。',ask:'We propose a quality target of [x] ppm for the first 12 months after SOP. Please advise if this is acceptable.',owner:'产品工程'},
+  {id:'C5',kind:'可能偏差',reqs:'R014',q:'停产后备件 15 年，长于常见的 10 年，请工程师判断。',ask:'Spare parts supply for 15 years after EOP: please confirm whether a last-time-buy arrangement after year 10 is acceptable.',owner:'产品工程'},
+  {id:'C6',kind:'需澄清',reqs:'R007',q:'“客户认可的等效材料”的认可流程和时间没有说明。',ask:'Please describe the approval process and lead time for an equivalent material to 42CrMo4.',owner:'商务'},
+  {id:'C7',kind:'需澄清',reqs:'R015',q:'成本分解模板 CBD-07 没有随 RFQ 附上。',ask:'Template CBD-07 was not included in the RFQ package. Could you please send it?',owner:'商务'}
+];
+
+const DRAW0 = [
+  {id:'d1',name:'零件号',ai:'D-SC-4410',conf:'高',box:[380,280,125,27]},
+  {id:'d2',name:'图纸版本',ai:'C',conf:'高',box:[505,280,125,27]},
+  {id:'d3',name:'零件名称',ai:'转向输入轴',conf:'高',box:[380,307,250,27]},
+  {id:'d4',name:'材料',ai:'42CrMo4',conf:'高',box:[380,334,125,27]},
+  {id:'d5',name:'重量',ai:'1.86 kg',conf:'高',box:[505,334,125,27]},
+  {id:'d6',name:'表面处理',ai:'42CrMo4',conf:'低',box:[380,361,250,27],right:'Zn-Ni ≥ 8 µm',why:'标题栏相邻格子可能串位'},
+  {id:'d7',name:'关键尺寸',ai:'Ø22 h7（特殊特性 ◆）',conf:'中',box:[118,74,120,26]},
+  {id:'d8',name:'总长',ai:'286 mm',conf:'高',box:[205,236,92,24]}
+];
+
+const SIMS = [
+  {id:'s1',y:2025,cust:'客户A',name:'某车型转向管柱总成',sc:0.91,why:'同为可调转向管柱；输入轴材料相同（42CrMo4）；年产量 10 万套；图纸结构相近',price:149.80,res:'已定点',mix:[24,22,48,6]},
+  {id:'s2',y:2024,cust:'客户D',name:'某平台转向管柱',sc:0.86,why:'同一客户；结构相近；支架为传统焊接，没有激光焊',price:158.20,res:'丢标（价格偏高）',mix:[22,25,47,6]},
+  {id:'s3',y:2025,cust:'客户C',name:'转向管柱（电动调节）',sc:0.79,why:'结构相近，但带电动调节机构',price:236.00,res:'已定点',mix:[15,18,63,4]},
+  {id:'s4',y:2024,cust:'客户B',name:'转向中间轴',sc:0.71,why:'输入轴的下料、车削、淬火、磨削工艺相同',price:64.30,res:'已定点',mix:[40,45,10,5]},
+  {id:'s5',y:2023,cust:'客户E',name:'转向管柱支架',sc:0.66,why:'支架的冲压 + 焊接工艺可参考',price:21.80,res:'已定点',mix:[45,42,0,13]}
+];
+
+function costInit(){
+  return {
+    vol:120000, life:6, years:6, scrap:1.5, mgmt:8, profit:6, pack:3.20, fx:7.80, labor:55,
+    parts:[
+      {id:'P1',name:'转向输入轴',qty:1,mat:'42CrMo4',newMat:false,net:1.86,gross:2.30,price:9.80,rec:2.20,
+       ops:[{n:'下料锯切',ct:18,oee:85,def:85,ppl:0.5,rate:60},{n:'车削',ct:34,oee:85,def:85,ppl:1,rate:120},{n:'感应淬火',ct:26,oee:80,def:80,ppl:0.5,rate:150},{n:'磨削',ct:40,oee:85,def:85,ppl:1,rate:140}]},
+      {id:'P2',name:'管柱支架',qty:1,mat:'S420MC',newMat:true,net:0.92,gross:1.25,price:7.20,rec:2.00,
+       ops:[{n:'冲压',ct:8,oee:85,def:85,ppl:1,rate:200},{n:'激光焊接（新工序）',ct:null,j01:true,simN:'MIG 焊接',simCt:38,oee:85,def:85,ppl:1,rate:110}]}
+    ],
+    buy:[{id:'B1',name:'轴承',qty:2,cur:'CNY',est:true,last:6.80,actual:7.60,arrived:false},{id:'B2',name:'万向节',qty:2,cur:'EUR',price:4.20,est:false}],
+    asm:{n:'总成装配',ct:60,oee:90,def:90,ppl:2,rate:80},
+    tools:[{n:'支架冲压模',inv:180000,pay:'分摊进单价'},{n:'激光焊工装',inv:60000,pay:'客户一次性支付'}],
+    testFee:35000, testOk:false,
+    j01:{ct:45.6, reason:''}, estReason:'',
+    ov:{on:false,val:'',reason:''},
+    sim:null, changed:[]
+  };
+}
+
+/* ---------- 状态 ---------- */
+let S;
+function fresh(){
+  S = {
+    view:'list', sel:null, tab:'req', tourOpen:true, done:{},
+    quotes: QUOTES0.map(q => Object.assign({}, q)),
+    arrived:false,
+    draft:{cust:false, due:false, dueVal:'2026-11-12'},
+    grade:{mode:'ai', type:'新项目', pri:'高', why:''},
+    parseStep:-1,
+    reqs: REQS0.map(r => Object.assign({st: r.suspect ? 'suspect' : 'pending'}, r)),
+    trans:false, act:null,
+    checks: CHECKS0.map(c => Object.assign({}, c)),
+    clars: CLARS0.map(c => Object.assign({st:'pending', edit:false}, c)),
+    draw: DRAW0.map(d => Object.assign({st:'pending', val:d.ai}, d)), dsel:null,
+    review:{concl:'', text:'', devs:{}},
+    cost: costInit(),
+    appr:{done:false}, result:null, mailDone:false,
+    log:[], clock: 9*60+5, modal:null
+  };
+}
+fresh();
+
+function q24(){ return S.quotes.find(q => q.id === 'Q2610-024'); }
+function stamp(){ S.clock += 3 + Math.floor(Math.random()*6); const h = Math.floor(S.clock/60), m = S.clock%60; return '10-27 ' + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0'); }
+function log(who, what){ S.log.unshift({t:stamp(), who, what}); }
+function setSt(n){ const q = q24(); if(q){ q.st = n; q.stay = 0; } }
+
+/* ---------- 体验路线 ---------- */
+const TOUR = [
+  {k:'arrive',t:'收到一封新询价',d:'在报价单列表点“模拟收到一封新询价”',go:() => go('list')},
+  {k:'reg',t:'确认登记',d:'核对 AI 抽取的字段，截止日期和客户必须人确认',go:() => open24()},
+  {k:'grade',t:'确认分级',d:'看 AI 的类型和优先级建议',go:() => open24()},
+  {k:'req',t:'确认要求清单',d:'左边原文、右边清单；关键要求要逐条确认；处理一条“可疑”',go:() => open24('req')},
+  {k:'check',t:'处理关键要求“没找到”',d:'6 项没找到：补位置、不适用、或加入澄清',go:() => open24('check')},
+  {k:'clar',t:'确认澄清和偏差清单',d:'采纳、修改或删除 AI 起草的条目，再导出',go:() => open24('clar')},
+  {k:'draw',t:'看图纸字段',d:'改正一个标黄的低置信度字段',go:() => open24('draw')},
+  {k:'review',t:'技术评审',d:'产品工程师给出可行性结论',go:() => open24('review')},
+  {k:'cost',t:'成本核算',d:'看相似项目、改参数、填人工判断节点、回价更新',go:() => open24('cost')},
+  {k:'appr',t:'审批、提交、登记结果',d:'按条件生成审批流，生成客户模板和 ERP 导入文件',go:() => open24('appr')},
+  {k:'board',t:'看看板',d:'运营页、统计页、效果页',go:() => go('ops')}
+];
+function mark(k){ if(!S.done[k]){ S.done[k] = true; } }
+function tourHTML(){
+  const n = TOUR.filter(s => S.done[s.k]).length;
+  const next = TOUR.find(s => !S.done[s.k]);
+  let h = '<div class="tour-head"><h3>体验路线</h3><span class="mono small muted">' + n + ' / ' + TOUR.length + '</span><div class="tour-bar" aria-hidden="true"><i style="width:' + (n/TOUR.length*100) + '%"></i></div>';
+  h += next ? '<span class="small">下一步：<b>' + esc(next.t) + '</b></span><button class="btn sm primary" data-a="tourGo" data-k="' + next.k + '">去做</button>' : '<span class="chip green">全部走完了</span>';
+  h += '<button class="btn sm" data-a="tourToggle">' + (S.tourOpen ? '收起' : '展开') + '</button></div>';
+  if(S.tourOpen){
+    h += '<div class="tour-steps">' + TOUR.map((s,i) => '<button class="tstep ' + (S.done[s.k] ? 'done' : (next && next.k === s.k ? 'next' : '')) + '" data-a="tourGo" data-k="' + s.k + '"><span class="n">' + (S.done[s.k] ? '✓' : i+1) + '</span><span><b class="small">' + esc(s.t) + '</b><br><span class="small muted">' + esc(s.d) + '</span></span></button>').join('') + '</div>';
+  }
+  return h;
+}
+
+/* ---------- 导航 ---------- */
+function navHTML(){
+  const mailN = S.mailDone ? 0 : 1;
+  const it = (v, label, badge) => '<button class="' + (S.view === v || (v === 'list' && (S.view === 'detail' || S.view === 'draft')) ? 'on' : '') + '" data-a="go" data-v="' + v + '"><span>' + label + '</span>' + (badge ? '<span class="badge">' + badge + '</span>' : '') + '</button>';
+  return '<span class="grp">工作</span>' + it('list','报价单') + it('mail','未识别邮件', mailN) +
+    '<span class="grp">看板</span>' + it('ops','运营') + it('stats','统计') + it('effect','效果');
+}
+
+/* ---------- 报价单列表 ---------- */
+function remChip(q){
+  if(q.rem == null) return '<span class="muted">—</span>';
+  const lim = q.type === '工程变更' ? [1,3] : [2,5];
+  const cls = q.rem <= lim[0] ? 'red' : (q.rem <= lim[1] ? 'amber' : '');
+  return '<span class="chip ' + cls + ' mono">剩 ' + q.rem + ' 天</span>';
+}
+function stChip(q){
+  if(q.st === 9) return '<span class="chip green">结束 · ' + esc(q.result || '') + '</span>';
+  const stuck = q.stay > 3 && q.st < 7;
+  return '<span class="chip ' + (q.st === 3 || q.st === 0 || q.st === 1 ? 'blue' : '') + '">' + STATES[q.st] + '</span>' + (stuck ? ' <span class="chip amber" title="在当前状态超过 3 个工作日">⏸ 停留 ' + q.stay + ' 天</span>' : '');
+}
+function viewList(){
+  const qs = S.quotes.slice().sort((a,b) => (b.live?1:0) - (a.live?1:0) || (a.rem == null ? 99 : a.rem) - (b.rem == null ? 99 : b.rem));
+  let h = '<div class="row"><div class="stack" style="gap:2px;flex:1;min-width:220px"><h1>报价单</h1><p class="muted small">按剩余工作日排序；红色剩 2 天以内，黄色剩 5 天以内（工程变更减半）。</p></div>';
+  h += '<button class="btn primary" data-a="arrive" ' + (S.arrived ? 'disabled' : '') + '>模拟收到一封新询价</button></div>';
+  h += '<div class="card"><div class="scroll-x"><table class="t"><thead><tr><th>报价单号</th><th>客户</th><th>项目</th><th>类型</th><th>优先级</th><th>当前状态</th><th>负责人</th><th>截止</th><th>剩余</th></tr></thead><tbody>';
+  qs.forEach(q => {
+    h += '<tr class="click" data-a="open" data-id="' + q.id + '"><td class="mono">' + q.id + (q.live ? ' <span class="chip blue">新</span>' : '') + '</td><td>' + esc(q.cust) + '</td><td>' + esc(q.proj) + '</td><td>' + q.type + '</td><td>' + q.pri + '</td><td>' + stChip(q) + '</td><td class="mono">' + q.owner + '</td><td class="mono">' + q.due + '</td><td>' + remChip(q) + '</td></tr>';
+  });
+  h += '</tbody></table></div></div>';
+  if(!S.arrived) h += '<p class="note">从“模拟收到一封新询价”开始，可以把一份 RFQ 从收到一直走到定点。列表里其他报价单只展示进度。</p>';
+  return h;
+}
+
+/* ---------- 登记、分级、解析 ---------- */
+const PARSE = ['文档解析：把 128 页规范变成带版面和表格的文字','按章节切分（不按页切，避免跨页的要求被切断）','主模型逐段抽取要求，按固定格式输出','表格单独处理一遍，按行展开','遇到“见附录 C”，找到被引用的章节再抽一遍','原文校验：每条“原文”去文件里核对','合并去重','关键要求检查：对照 40 项检查表逐项找','起草澄清和偏差清单；生成中文对照','图纸：文字层给候选字段，视觉模型核对并定位'];
+function viewDraft(){
+  const q = q24();
+  let h = '<div class="row"><button class="btn sm" data-a="go" data-v="list">← 报价单</button><h1 class="mono">' + q.id + '</h1><span class="chip blue">' + STATES[q.st] + '</span></div>';
+  h += '<div class="mail">';
+  h += '<div class="card"><div class="card-h"><h2>询价邮件</h2><span class="muted small">询价共享邮箱 · 10-27 09:02 收到</span></div><div class="card-b mailbox">' +
+    '<div><span class="muted">发件人</span> 采购部 · 客户D</div><div><span class="muted">主题</span> RFQ – Steering Column Assembly – X1 Program</div>' +
+    '<div class="body">Dear supplier,<br>please find attached the RFQ package for the steering column assembly of the X1 program. Kindly submit your quotation <b>two weeks after the kick-off meeting</b>. Annual volumes and lifetime are listed in the attached volume sheet.<br>Best regards, Purchasing</div>' +
+    '<div class="muted small">附件</div><div class="row small">' + ['技术规范_SteeringColumn_v2.pdf · 128 页','物流说明.pdf · 6 页','RFQ letter.pdf · 2 页','图纸 D-SC-4410.pdf 等 3 张','年产量表.xlsx'].map(a => '<span class="chip">' + a + '</span>').join('') + '</div></div></div>';
+
+  const F = [
+    ['客户','客户D','高','发件人、签名','cust'],
+    ['项目','某新能源车型转向管柱总成','高','RFQ letter 第 1 页',''],
+    ['车型','X1','高','邮件主题',''],
+    ['产品','转向管柱','高','技术规范第 1 页',''],
+    ['截止日期','2026-11-12','低','RFQ letter 写 11 月 12 日；邮件正文写“kick-off 后两周”','due'],
+    ['平均年产量','120,000 套 / 年','高','年产量表.xlsx',''],
+    ['生命周期','6 年（2028–2033）','高','年产量表.xlsx',''],
+    ['联系人','采购工程师（示例）','中','邮件签名','']
+  ];
+  h += '<div class="card"><div class="card-h"><h2>报价单草稿</h2><span class="ai">AI 生成</span><span class="muted small">截止日期和客户必须人工确认</span></div><div class="scroll-x"><table class="t"><thead><tr><th>字段</th><th>AI 抽取结果</th><th>把握</th><th>出处</th><th>确认</th></tr></thead><tbody>';
+  F.forEach(f => {
+    const low = f[2] === '低';
+    let val = esc(f[1]);
+    if(f[4] === 'due') val = '<input class="in mono" type="date" id="dueVal" value="' + S.draft.dueVal + '" ' + (q.st > 0 ? 'disabled' : '') + '>';
+    const conf = '<span class="chip ' + (low ? 'amber' : (f[2] === '中' ? '' : 'green')) + '">' + f[2] + '</span>';
+    const must = f[4] ? '<label class="row small" style="gap:4px"><input type="checkbox" data-a="draftCk" data-k="' + f[4] + '" ' + (S.draft[f[4]] ? 'checked' : '') + ' ' + (q.st > 0 ? 'disabled' : '') + '>已核对</label>' : '<span class="muted small">—</span>';
+    h += '<tr' + (low ? ' style="background:var(--amber-soft)"' : '') + '><td>' + f[0] + '</td><td>' + val + '</td><td>' + conf + '</td><td class="small muted">' + esc(f[3]) + '</td><td>' + must + '</td></tr>';
+  });
+  h += '</tbody></table></div><div class="cbar">';
+  if(q.st === 0){
+    h += '<span class="small muted">截止日期有两种说法，先按 RFQ letter 填，系统会把它放进澄清清单。</span><span style="flex:1"></span><button class="btn primary" data-a="confirmReg" ' + (S.draft.cust && S.draft.due ? '' : 'disabled') + '>确认登记</button>';
+  } else h += '<span class="chip green">已登记 · S2 确认</span>';
+  h += '</div></div></div>';
+
+  if(q.st >= 1){
+    h += '<div class="card"><div class="card-h"><h2>询价分级</h2><span class="ai">AI 建议</span><span class="muted small">按分级标准给建议，商务主管决定</span></div><div class="card-b stack">';
+    h += '<div class="row"><span class="chip blue">新项目</span><span class="chip red">优先级 高</span></div><ul class="small" style="margin:0;padding-left:18px"><li>截止日期剩 12 个工作日，新项目报价一般要 13–18 个工作日</li><li>平均年产量 12 万套，属于大项目（分级标准：≥ 8 万套为高）</li><li>RFQ letter 写明是新车型项目，不是已定点项目的变更</li></ul>';
+    if(q.st === 1){
+      if(S.grade.mode === 'edit'){
+        h += '<div class="row small"><label>类型 <select class="in" id="gType"><option>新项目</option><option>工程变更</option><option>比价和预询价</option></select></label><label>优先级 <select class="in" id="gPri"><option>高</option><option>中</option><option>低</option></select></label><label>改动原因 <select class="in" id="gWhy"><option>标准没覆盖到</option><option>AI 判断错</option><option>其他</option></select></label></div>';
+        h += '<div class="row"><button class="btn primary" data-a="gradeOk" data-m="edit">按修改后的确认</button><button class="btn" data-a="gradeMode" data-m="ai">取消</button></div>';
+      } else {
+        h += '<div class="row"><button class="btn primary" data-a="gradeOk" data-m="ai">采纳建议，开始解析</button><button class="btn" data-a="gradeMode" data-m="edit">改一下</button></div>';
+      }
+    } else h += '<span class="chip green">已确认 · S1</span>';
+    h += '</div></div>';
+  }
+  if(q.st === 2){
+    h += '<div class="card parse"><div class="card-h"><h2>解析中</h2><span class="muted small">真实环境一份 150 页规范约 20 分钟，原型里几秒走完</span></div><div class="card-b"><ul>';
+    PARSE.forEach((p,i) => { const c = i < S.parseStep ? 'done' : (i === S.parseStep ? 'cur' : ''); h += '<li class="' + c + '"><span class="mono">' + (i < S.parseStep ? '✓' : (i === S.parseStep ? '…' : '·')) + '</span>' + esc(p) + '</li>'; });
+    h += '</ul></div></div>';
+  }
+  return h;
+}
+
+/* ---------- 详情页 ---------- */
+function stepsBar(q){
+  return '<div class="steps">' + STATES.map((s,i) => '<div class="st ' + (i < q.st ? 'done' : (i === q.st ? 'cur' : '')) + '">' + s + '</div>').join('') + '</div>';
+}
+function pendingReqs(){ return S.reqs.filter(r => r.st === 'pending' || r.st === 'suspect').length; }
+function pendingChecks(){ return S.checks.filter(c => c.res === 'missing' && !c.act).length; }
+function pendingClars(){ return S.clars.filter(c => c.st === 'pending').length; }
+function viewDetail(){
+  const q = S.quotes.find(x => x.id === S.sel);
+  let h = '<div class="row"><button class="btn sm" data-a="go" data-v="list">← 报价单</button><h1 class="mono">' + q.id + '</h1><span>' + esc(q.cust) + ' · ' + esc(q.proj) + '</span><span class="chip">' + q.type + '</span><span class="chip">优先级 ' + q.pri + '</span>' + (q.rem != null ? '<span class="mono small">截止 ' + q.due + ' · </span>' + remChip(q) : '') + '</div>';
+  h += '<div class="card">' + stepsBar(q);
+  if(!q.live){
+    h += '<div class="card-b stack"><p>当前状态：<b>' + STATES[q.st] + '</b>，负责人 <span class="mono">' + q.owner + '</span>' + (q.stay > 3 && q.st < 7 ? '，已经在这一步停留 ' + q.stay + ' 个工作日' : '') + '。</p><p class="note">原型里这份报价单只展示进度。完整的流程请走 Q2610-024：在报价单列表点“模拟收到一封新询价”。</p></div></div>';
+    return h;
+  }
+  const T = [['req','要求清单',pendingReqs()],['check','关键要求检查',pendingChecks()],['clar','澄清和偏差',pendingClars()],['draw','图纸字段',S.draw.filter(d => d.conf === '低' && d.st === 'pending').length],['review','技术评审',0],['cost','成本核算',0],['appr','审批和提交',0],['log','操作记录',0]];
+  h += '<div class="tabs" role="tablist">' + T.map(t => '<button role="tab" class="' + (S.tab === t[0] ? 'on' : '') + '" data-a="tab" data-t="' + t[0] + '">' + t[1] + (t[2] ? '<span class="badge">' + t[2] + '</span>' : '') + '</button>').join('') + '</div>';
+  const f = {req:tabReq, check:tabCheck, clar:tabClar, draw:tabDraw, review:tabReview, cost:tabCost, appr:tabAppr, log:tabLog}[S.tab];
+  h += f(q) + '</div>';
+  return h;
+}
+function gateBar(q){
+  const a = pendingReqs(), b = pendingChecks();
+  if(q.st > 3) return '<div class="cbar"><span class="chip green">已提交技术评审</span></div>';
+  return '<div class="cbar"><span class="small">要求清单待确认 <b class="mono">' + a + '</b> 条 · 关键要求“没找到”待处理 <b class="mono">' + b + '</b> 项</span><span style="flex:1"></span><button class="btn primary" data-a="toReview" ' + (a || b ? 'disabled' : '') + '>提交技术评审</button></div>';
+}
+function tabReq(q){
+  let h = '<div class="split"><div class="pane" id="specPane"><div class="grp-h"><b class="small">技术规范_SteeringColumn_v2.pdf</b><span class="muted small">原型节选 16 页</span><span style="flex:1"></span><label class="small row" style="gap:4px"><input type="checkbox" data-a="trans" ' + (S.trans ? 'checked' : '') + '>中文对照</label></div>';
+  PAGES.forEach(pg => {
+    h += '<div class="page" id="pg' + pg.p + '"><div class="ph">第 ' + pg.p + ' 页 · ' + esc(pg.sec) + '</div>';
+    pg.segs.forEach(s => {
+      if(s[1]){
+        const r = S.reqs.find(x => x.id === s[1]);
+        const hl = S.act === s[1] && r && r.st !== 'suspect';
+        h += '<span class="seg mark' + (hl ? ' hl' : '') + '" id="seg' + s[1] + '">' + esc(s[0]) + '</span>';
+      } else h += esc(s[0]);
+    });
+    if(S.trans) h += '<div class="zh">机器翻译，仅供理解，以原文为准：' + esc(pg.zh) + '</div>';
+    h += '</div>';
+  });
+  h += '</div><div class="pane" id="reqPane">';
+  CATS.forEach(cat => {
+    const rs = S.reqs.filter(r => r.cat === cat);
+    if(!rs.length) return;
+    const pend = rs.filter(r => r.st === 'pending' && !r.key).length;
+    h += '<div class="grp-h"><b class="small">' + cat + '</b><span class="muted small mono">' + rs.length + ' 条</span><span style="flex:1"></span>' + (pend ? '<button class="btn sm" data-a="grpOk" data-c="' + cat + '" title="关键要求不能整组确认">整组确认非关键 ' + pend + ' 条</button>' : '') + '</div>';
+    rs.forEach(r => {
+      const pg = PAGES.find(p => p.p === r.p);
+      const seg = pg && pg.segs.find(s => s[1] === r.id);
+      const orig = r.st === 'suspect' ? r.bad : (seg ? seg[0] : '');
+      let st = '';
+      if(r.st === 'pending') st = '<button class="btn sm" data-a="reqOk" data-id="' + r.id + '">确认</button><button class="btn sm" data-a="reqDel" data-id="' + r.id + '">删除</button>';
+      else if(r.st === 'suspect') st = '<button class="btn sm warn" data-a="reqFix" data-id="' + r.id + '">按原文改正</button><button class="btn sm" data-a="reqDel" data-id="' + r.id + '">删除</button>';
+      else if(r.st === 'deleted') st = '<button class="btn sm" data-a="reqUndo" data-id="' + r.id + '">恢复</button>';
+      else st = '<span class="chip green">' + (r.st === 'edited' ? '已改正' : '已确认') + '</span>';
+      h += '<div class="req ' + (S.act === r.id ? 'on ' : '') + (r.st === 'deleted' ? 'deleted' : '') + '" data-a="reqSel" data-id="' + r.id + '"><span class="id">' + r.id + '</span><div><span class="sum">' + esc(r.sum) + '</span><div class="row" style="gap:4px;margin-top:3px">' + (r.key ? '<span class="chip red">关键</span>' : '') + '<span class="ai">' + (r.src ? 'AI · ' + r.src : 'AI 摘取') + '</span><span class="chip mono">p.' + r.p + '</span>' + (r.st === 'suspect' ? '<span class="chip amber">可疑：原文在文件里找不到</span>' : '') + '</div></div><div class="acts">' + st + '</div><div class="orig">“' + esc(orig) + '”</div></div>';
+    });
+  });
+  h += '<div class="note" style="margin:12px 14px">原型列了 16 条。真实的一份规范约 180 条，按类别分组，大部分可以整组确认；关键要求必须逐条确认。</div></div></div>';
+  return h + gateBar(q);
+}
+function tabCheck(q){
+  const miss = S.checks.filter(c => c.res === 'missing');
+  let h = '<div class="card-b row"><span class="chip green">找到 ' + (40 - miss.length) + ' 项</span><span class="chip red">没找到 ' + miss.length + ' 项</span><span class="muted small">没把握的一律标“没找到”，宁可多报，不能漏报。每个“没找到”都要处理。</span></div>';
+  CHECK_CATS.forEach(cat => {
+    h += '<div class="grp-h"><b class="small">' + cat + '</b></div>';
+    S.checks.filter(c => c.cat === cat).forEach(c => {
+      if(c.res === 'found'){
+        h += '<div class="ck"><span>' + esc(c.name) + '</span><span class="r"><span class="chip green">找到</span><span class="chip mono">' + esc(c.ref) + '</span></span></div>';
+      } else {
+        let r = '';
+        if(!c.act){
+          r = '<button class="btn sm" data-a="ckAct" data-id="' + c.id + '" data-v="file">在其他文件里找到</button><button class="btn sm" data-a="ckAct" data-id="' + c.id + '" data-v="na">不适用</button><button class="btn sm" data-a="ckAct" data-id="' + c.id + '" data-v="none">确实没有 → 加入澄清</button>';
+        } else if(c.act === 'file') r = '<span class="chip green">已补位置</span><span class="chip mono">' + esc(c.why) + '</span>';
+        else if(c.act === 'na') r = '<span class="chip">不适用</span><span class="small muted">' + esc(c.why) + '</span>';
+        else r = '<span class="chip amber">确实没有 · 已加入澄清</span>';
+        h += '<div class="ck miss' + (c.act ? ' done' : '') + '"><span><b>' + esc(c.name) + '</b>' + (c.act ? '' : '<br><span class="small muted">' + esc(MISS_HINT[c.name] || '') + '</span>') + '</span><span class="r">' + (c.act ? '' : '<span class="chip red">没找到</span>') + r + '</span></div>';
+      }
+    });
+  });
+  return h + gateBar(q);
+}
+function tabClar(q){
+  let h = '<div class="card-b row"><span class="muted small">AI 起草，人确认。偏差由产品工程师确认，澄清由商务确认。<b>系统不会直接给客户发邮件。</b></span><span style="flex:1"></span><button class="btn" data-a="exportClar">导出澄清清单</button></div>';
+  S.clars.forEach(c => {
+    let acts = '';
+    if(c.st === 'pending') acts = '<button class="btn sm primary" data-a="clOk" data-id="' + c.id + '">采纳</button><button class="btn sm" data-a="clEdit" data-id="' + c.id + '">修改</button><button class="btn sm" data-a="clDel" data-id="' + c.id + '">删除</button>';
+    else if(c.st === 'deleted') acts = '<span class="chip">已删除</span><button class="btn sm" data-a="clUndo" data-id="' + c.id + '">恢复</button>';
+    else acts = '<span class="chip green">' + (c.st === 'edited' ? '修改后采纳' : '已采纳') + '</span>';
+    h += '<div class="cl ' + (c.st === 'deleted' ? 'deleted' : '') + '"><div class="row"><span class="mono small muted">' + c.id + '</span><span class="chip ' + (c.kind === '可能偏差' ? 'amber' : 'blue') + '">' + c.kind + '</span><span class="small muted">涉及 ' + esc(c.reqs) + ' · ' + c.owner + '确认</span>' + (c.from ? '<span class="chip">来自关键要求检查</span>' : '<span class="ai">AI 起草</span>') + '<span style="flex:1"></span>' + acts + '</div>';
+    if(c.edit) h += '<textarea class="in" id="clTxt' + c.id + '">' + esc(c.q) + '</textarea><div class="row"><button class="btn sm primary" data-a="clSave" data-id="' + c.id + '">保存并采纳</button></div>';
+    else h += '<p>' + esc(c.q) + '</p>';
+    h += '<p class="ask">' + esc(c.ask) + '</p></div>';
+  });
+  return h;
+}
+function drawSVG(){
+  const sel = S.draw.find(d => d.id === S.dsel);
+  let s = '<svg viewBox="0 0 640 400" role="img" aria-label="零件图纸示例：转向输入轴">';
+  s += '<rect x="8" y="8" width="624" height="384" class="thin"/>';
+  // 轴的外形
+  s += '<path class="ln" d="M60 150 V170 H110 V140 H200 V132 H300 V142 H380 V150 H460 V170 M60 170 V190 H110 V200 H200 V208 H300 V198 H380 V190 H460 V170"/>';
+  s += '<path class="thin" d="M40 170 H480" stroke-dasharray="10 3 2 3"/>';
+  // 尺寸线
+  s += '<path class="thin" d="M200 120 V100 M300 120 V100 M200 104 H300"/><text class="txt" x="124" y="92">Ø22 h7 ◆</text>';
+  s += '<path class="thin" d="M60 210 V232 M460 210 V232 M60 228 H460"/><text class="txt" x="232" y="252">286</text>';
+  s += '<text class="txt s" x="60" y="290">技术要求：1. 未注倒角 C0.5；2. 感应淬火 HRC 50–55；3. 表面处理见标题栏。</text>';
+  // 标题栏
+  s += '<rect x="380" y="280" width="250" height="108" class="thin"/>';
+  s += '<path class="thin" d="M380 307 H630 M380 334 H630 M380 361 H630 M505 280 V307 M505 334 V361"/>';
+  const cell = (x,y,l,v) => '<text class="txt s" x="' + (x+5) + '" y="' + (y+11) + '">' + l + '</text><text class="txt" x="' + (x+5) + '" y="' + (y+23) + '">' + v + '</text>';
+  s += cell(380,280,'零件号','D-SC-4410') + cell(505,280,'版本','C') + cell(380,307,'名称','转向输入轴 INPUT SHAFT') + cell(380,334,'材料','42CrMo4') + cell(505,334,'重量','1.86 kg') + cell(380,361,'表面处理','Zn-Ni ≥ 8 µm');
+  if(sel) s += '<rect class="box" x="' + sel.box[0] + '" y="' + sel.box[1] + '" width="' + sel.box[2] + '" height="' + sel.box[3] + '" rx="2"/>';
+  return s + '</svg>';
+}
+function tabDraw(){
+  let h = '<div class="split"><div class="pane draw"><div class="grp-h"><b class="small">图纸 D-SC-4410.pdf</b><span class="muted small">PDF 矢量图 · 点右边字段，图上框出位置</span></div>' + drawSVG() + '</div><div class="pane"><div class="grp-h"><b class="small">抽取的字段</b><span class="ai">文字层 + 视觉模型</span></div>';
+  S.draw.forEach(d => {
+    const low = d.conf === '低' && d.st === 'pending';
+    let right = '<span class="chip ' + (d.conf === '低' ? 'amber' : (d.conf === '中' ? '' : 'green')) + '">' + d.conf + '</span>';
+    let val = esc(d.val);
+    if(d.edit) val = '<input class="in" id="dv' + d.id + '" value="' + esc(d.val) + '"> <button class="btn sm primary" data-a="dSave" data-id="' + d.id + '">保存</button>';
+    else if(d.st === 'fixed') right += ' <span class="chip green">已改正</span>';
+    else if(low) right += ' <button class="btn sm warn" data-a="dEdit" data-id="' + d.id + '">改正</button>';
+    h += '<div class="fld ' + (low ? 'low ' : '') + (S.dsel === d.id ? 'on' : '') + '" data-a="dSel" data-id="' + d.id + '"><span class="muted small">' + d.name + '</span><span>' + val + (low ? '<br><span class="small" style="color:var(--amber)">' + esc(d.why) + '</span>' : '') + '</span><span class="row" style="gap:4px">' + right + '</span></div>';
+  });
+  h += '<div class="note" style="margin:12px 14px">一期只解析 PDF 矢量图；扫描件和 CAD 原文件在二期加入。图纸上的技术要求文字也会进要求清单。</div></div></div>';
+  return h;
+}
+function tabReview(q){
+  if(q.st < 4) return '<div class="card-b"><p class="note">要求清单确认完、关键要求“没找到”都处理完，才能提交技术评审。</p></div>';
+  const devs = S.clars.filter(c => c.kind === '可能偏差' && c.st !== 'deleted' && c.st !== 'pending');
+  let h = '<div class="card-b stack"><h3>技术评审（产品工程师 E1）</h3>';
+  if(q.st > 4){
+    h += '<p><span class="chip green">' + esc(S.review.concl) + '</span> ' + esc(S.review.text || '') + '</p><p class="small muted">' + (Object.keys(S.review.devs).filter(k => S.review.devs[k]).map(k => '偏差 ' + k).join('、') || '没有关联偏差') + '</p></div>';
+    return h;
+  }
+  h += '<div class="row">' + ['可做','有条件可做','不可做'].map(v => '<label class="row small" style="gap:4px"><input type="radio" name="concl" data-a="concl" value="' + v + '" ' + (S.review.concl === v ? 'checked' : '') + '>' + v + '</label>').join('') + '</div>';
+  h += '<div class="stack small"><span class="muted">关联的偏差（澄清和偏差清单里已采纳的“可能偏差”）</span>' + (devs.length ? devs.map(c => '<label class="row" style="gap:6px"><input type="checkbox" data-a="dev" data-id="' + c.id + '" ' + (S.review.devs[c.id] ? 'checked' : '') + '><span class="mono">' + c.id + '</span>' + esc(c.q.slice(0,40)) + '…</label>').join('') : '<span class="note">还没有采纳任何“可能偏差”。可以先去“澄清和偏差”页处理。</span>') + '</div>';
+  h += '<label class="stack small"><span class="muted">评审意见</span><textarea class="in" id="revTxt" placeholder="例如：可以做；10 ppm 目标需要提出偏差，建议首年按 xx ppm。">' + esc(S.review.text) + '</textarea></label>';
+  h += '<div class="row"><button class="btn primary" data-a="reviewOk" ' + (S.review.concl ? '' : 'disabled') + '>提交评审意见</button><span class="small muted">提交后进入成本核算。</span></div></div>';
+  return h;
+}
+
+/* ---------- 成本核算（规则引擎，AI 不算价） ---------- */
+function opCalc(o, c, ctOverride){
+  const ct = ctOverride != null ? ctOverride : o.ct;
+  const cct = ct / (o.oee/100);
+  const eq = cct/3600*o.rate, lab = cct/3600*o.ppl*c.labor;
+  return {cct, eq, lab, sum:eq+lab};
+}
+function compute(){
+  const c = S.cost; const R = {parts:[], flags:[], appr:[], rules:[]};
+  let partsSum = 0;
+  c.parts.forEach(p => {
+    const mat = p.gross*p.price - (p.gross-p.net)*p.rec;
+    let proc = 0; const ops = p.ops.map(o => { const r = opCalc(o, c, o.j01 ? c.j01.ct : null); proc += r.sum; return r; });
+    const sr = c.scrap + (p.newMat ? 2 : 0);
+    const scrap = (mat+proc)*sr/100;
+    const tot = (mat+proc+scrap)*p.qty;
+    partsSum += tot;
+    R.parts.push({mat,proc,ops,sr,scrap,tot,util:p.net/p.gross*100});
+    if(p.gross < p.net) R.flags.push({lv:'err',code:'C-01',t:p.name + '：毛重小于净重，不能保存'});
+    else if(p.net/p.gross*100 < 50 || p.net/p.gross*100 > 98) R.flags.push({lv:'warn',code:'C-02',t:p.name + '：材料利用率 ' + (p.net/p.gross*100).toFixed(1) + '%，超出常见范围，请核对'});
+    p.ops.forEach(o => { if(Math.abs(o.oee - o.def) > 5) R.appr.push({who:'C1',why:p.name + ' · ' + o.n + '：设备综合效率 ' + o.oee + '%，偏离默认值 ' + o.def + '% 超过 5 个百分点'}); });
+  });
+  const buy = c.buy.map(b => {
+    let unit;
+    if(b.est) unit = b.arrived ? b.actual : b.last*1.05;
+    else unit = b.price*(b.cur === 'EUR' ? c.fx : 1);
+    return {unit, tot:unit*b.qty};
+  });
+  const buySum = buy.reduce((a,b) => a+b.tot, 0);
+  const asm = opCalc(c.asm, c);
+  if(Math.abs(c.asm.oee - c.asm.def) > 5) R.appr.push({who:'C1',why:'总成装配：设备综合效率 ' + c.asm.oee + '%，偏离默认值 ' + c.asm.def + '% 超过 5 个百分点'});
+  const asmScrap = (asm.sum + buySum)*c.scrap/100;
+  const toolAlloc = c.tools.filter(t => t.pay === '分摊进单价').reduce((a,t) => a+t.inv, 0) / (c.vol*c.years);
+  const matSum = R.parts.reduce((a,p) => a+p.mat*1, 0);
+  const procSum = R.parts.reduce((a,p) => a+p.proc, 0) + asm.sum;
+  const scrapSum = R.parts.reduce((a,p) => a+p.scrap, 0) + asmScrap;
+  const mfg = partsSum + buySum + asm.sum + asmScrap + toolAlloc + c.pack;
+  const mgmt = mfg*c.mgmt/100;
+  const profit = (mfg+mgmt)*c.profit/100;
+  const unit = mfg+mgmt+profit;
+  Object.assign(R, {buy,buySum,asm,asmScrap,toolAlloc,matSum,procSum,scrapSum,mfg,mgmt,profit,unit});
+  let final = unit;
+  if(c.ov.on && c.ov.val !== ''){
+    const v = parseFloat(c.ov.val);
+    if(!isNaN(v)){ final = v; const pct = Math.abs(v-unit)/unit*100; R.ovPct = pct; if(pct > 5) R.appr.push({who:'C1',why:'人工覆盖单价，幅度 ' + pct.toFixed(1) + '%，超过 5%（J-04）'}); if(!c.ov.reason.trim()) R.flags.push({lv:'err',code:'J-04',t:'人工覆盖必须写理由'}); }
+  }
+  R.final = final;
+  if(c.profit < 5) R.appr.push({who:'工厂领导',why:'利润率 ' + c.profit + '%，低于下限 5%（G-05）'});
+  if(c.years < c.life) R.appr.push({who:'商务主管',why:'分摊年数 ' + c.years + ' 年，短于生命周期 ' + c.life + ' 年'});
+  const est = c.buy.find(b => b.est && !b.arrived);
+  if(est && !c.estReason.trim()) R.flags.push({lv:'err',code:'C-06',t:'轴承还是估价：回价到了再提交，或写明原因'});
+  if(!c.j01.reason.trim()) R.flags.push({lv:'err',code:'C-07',t:'人工判断节点 J-01（激光焊接节拍）还没写理由'});
+  if(!c.testOk) R.flags.push({lv:'err',code:'G-04',t:'专项测试费要产品工程（E1）确认'});
+  R.annual = final*c.vol;
+  if(R.annual > 20000000) R.appr.push({who:'工厂领导',why:'年度报价金额超过 2,000 万元'});
+  R.rules = [
+    ['G-01','新材料加成', c.parts.some(p => p.newMat) ? '触发：管柱支架用 S420MC，成本库里没有使用记录，制造废品率 +2 个百分点' : '未触发', c.parts.some(p => p.newMat)],
+    ['G-02','低产量专用分摊', c.vol < 50000 ? '触发：平均年产量低于 5 万套，建议设备按专用分摊' : '未触发：平均年产量 ' + (c.vol/10000) + ' 万套，不低于 5 万套', c.vol < 50000],
+    ['G-03','回价未到先估价', est ? '触发：轴承按最近同类件 6.80 元 × 1.05 估价，标“估价”' : '已替换为供应商回价', !!est],
+    ['G-04','需关注标准加测试费','触发：规范第 48 页引用了 2 项需关注标准，带出专项测试费 35,000 元（一次性，单列）', true],
+    ['G-05','利润率下限', c.profit < 5 ? '触发：转工厂领导审批' : '未触发：利润率 ' + c.profit + '%，不低于 5%', c.profit < 5],
+    ['G-06','分摊年数默认','分摊年数默认取生命周期 ' + c.life + ' 年', false],
+    ['G-07','汇率变动提示','未触发：用财务公布的 10 月汇率 EUR = ' + c.fx, false]
+  ];
+  return R;
+}
+function numIn(path, v, cls, step){ const q = q24(); if(q && q.st > 5) return '<span class="mono">' + v + '</span>'; return '<input class="in num ' + (cls||'') + '" type="number" step="' + (step||'any') + '" data-c="' + path + '" value="' + v + '">'; }
+function tabCost(q){
+  if(q.st < 5) return '<div class="card-b"><p class="note">技术评审提交后才能开始成本核算。</p></div>';
+  const c = S.cost, R = compute();
+  const locked = q.st > 5;
+  let h = '<div class="card-b stack">';
+  h += '<div class="row"><span class="chip blue">业务本体 v1.1</span><span class="small muted">公式 15 条 · 规则 7 条 · 人工判断节点 5 个 · 校验 7 条。价格只由规则引擎按公式计算，AI 不参与。</span>' + (locked ? '<span class="chip green">已提交审批，按 v1.1 锁定</span>' : '') + '</div>';
+  h += '<div class="cost-grid"><div class="stack" style="min-width:0">';
+
+  // 相似项目
+  h += '<div class="card"><div class="card-h"><h3>相似项目</h3><span class="ai">AI 检索 · 文字 + 图纸 + 本体字段过滤</span></div>';
+  h += '<div class="legend" style="padding:8px 14px 0"><span style="--c:var(--accent)">材料</span><span style="--c:var(--ai)">加工</span><span style="--c:var(--amber)">外购件</span><span style="--c:var(--muted)">工装和其他</span></div>';
+  SIMS.forEach(s => {
+    h += '<div class="sim ' + (c.sim === s.id ? 'on' : '') + '"><div class="row"><b class="small">' + s.y + ' · ' + esc(s.cust) + ' · ' + esc(s.name) + '</b><span class="chip mono">相似度 ' + s.sc.toFixed(2) + '</span><span class="chip ' + (s.res === '已定点' ? 'green' : 'amber') + '">' + esc(s.res) + '</span><span class="mono small">当时单价 ¥' + fx2(s.price) + '</span><span style="flex:1"></span>' + (c.sim === s.id ? '<span class="chip blue">已作为参考</span>' : '<button class="btn sm" data-a="simPick" data-id="' + s.id + '" ' + (locked ? 'disabled' : '') + '>参考这个</button>') + '</div><span class="small muted">' + esc(s.why) + '</span><div class="mini">' + s.mix.map(m => '<i style="width:' + m + '%"></i>').join('') + '</div></div>';
+  });
+  h += '</div>';
+
+  // 自制件
+  c.parts.forEach((p,pi) => {
+    const r = R.parts[pi];
+    h += '<div class="card"><div class="card-h"><h3>自制件 · ' + esc(p.name) + '</h3><span class="chip mono">' + esc(p.mat) + '</span>' + (p.newMat ? '<span class="chip amber">新材料 · G-01</span>' : '') + '<span style="flex:1"></span><span class="mono">¥' + fx2(r.tot) + '</span></div>';
+    const errG = p.gross < p.net;
+    h += '<div class="card-b row small"><label>净重 kg <span class="mono">' + p.net + '</span><span class="muted">（图纸带入）</span></label><label>毛重 kg ' + numIn('parts.' + pi + '.gross', p.gross, errG ? 'err' : '', '0.01') + '</label><label>材料单价 ' + numIn('parts.' + pi + '.price', p.price, '', '0.01') + '</label><span class="muted">材料利用率 <span class="mono">' + r.util.toFixed(1) + '%</span> · 材料费 <span class="mono">¥' + fx2(r.mat) + '</span> · 制造废品率 <span class="mono">' + r.sr + '%</span></span></div>';
+    h += '<div class="scroll-x"><table class="t"><thead><tr><th>工序</th><th class="num">标准节拍 s</th><th class="num">设备综合效率 %</th><th class="num">核算节拍 s</th><th class="num">人数</th><th class="num">设备费率</th><th class="num">工序费用</th></tr></thead><tbody>';
+    p.ops.forEach((o,oi) => {
+      const rr = r.ops[oi];
+      const off = Math.abs(o.oee - o.def) > 5;
+      const ctCell = o.j01 ? '<span class="chip amber">J-01</span> <span class="mono">' + c.j01.ct + '</span>' : (locked ? o.ct : numIn('parts.' + pi + '.ops.' + oi + '.ct', o.ct, '', '1'));
+      h += '<tr><td>' + esc(o.n) + '</td><td class="num">' + ctCell + '</td><td class="num">' + (locked ? o.oee : numIn('parts.' + pi + '.ops.' + oi + '.oee', o.oee, off ? 'warn' : '', '1')) + '</td><td class="num">' + rr.cct.toFixed(1) + '</td><td class="num">' + o.ppl + '</td><td class="num">' + o.rate + '</td><td class="num">' + fx2(rr.sum) + '</td></tr>';
+    });
+    h += '</tbody></table></div></div>';
+  });
+
+  // 外购件、装配、工装、参数
+  h += '<div class="card"><div class="card-h"><h3>外购件、装配和工装</h3><span style="flex:1"></span>' + (c.buy[0].arrived ? '<span class="chip green">轴承回价已更新</span>' : '<button class="btn sm" data-a="quoteArrive" ' + (locked ? 'disabled' : '') + '>模拟：供应商回价到了</button>') + '</div><div class="scroll-x"><table class="t"><thead><tr><th>项目</th><th>来源</th><th class="num">单价</th><th class="num">数量</th><th class="num">小计</th></tr></thead><tbody>';
+  c.buy.forEach((b,bi) => {
+    const rb = R.buy[bi]; const flash = c.changed.indexOf(b.id) >= 0 ? ' class="flash"' : '';
+    h += '<tr' + flash + '><td>' + esc(b.name) + '</td><td>' + (b.est ? (b.arrived ? '<span class="chip green">供应商回价</span> <span class="small muted">估价 ' + fx2(b.last*1.05) + ' → ' + fx2(b.actual) + '</span>' : '<span class="chip amber">估价 · G-03</span>') : '<span class="chip">回价 EUR ' + b.price.toFixed(2) + ' × ' + c.fx + '</span>') + '</td><td class="num">' + fx2(rb.unit) + '</td><td class="num">' + b.qty + '</td><td class="num">' + fx2(rb.tot) + '</td></tr>';
+  });
+  const aoff = Math.abs(c.asm.oee - c.asm.def) > 5;
+  h += '<tr><td>' + c.asm.n + '</td><td class="small">节拍 ' + c.asm.ct + ' s · ' + c.asm.ppl + ' 人 · 设备综合效率 ' + (locked ? c.asm.oee : numIn('asm.oee', c.asm.oee, aoff ? 'warn' : '', '1')) + '%<span class="muted">（装配线默认 90%，本体 v1.1）</span></td><td class="num">' + fx2(R.asm.sum) + '</td><td class="num">1</td><td class="num">' + fx2(R.asm.sum) + '</td></tr>';
+  c.tools.forEach(t => { h += '<tr><td>' + t.n + '</td><td class="small">投资 ¥' + t.inv.toLocaleString('zh-CN') + ' · ' + t.pay + '</td><td class="num">' + (t.pay === '分摊进单价' ? fx2(t.inv/(c.vol*c.years)) : '单列') + '</td><td class="num">—</td><td class="num">' + (t.pay === '分摊进单价' ? fx2(t.inv/(c.vol*c.years)) : '—') + '</td></tr>'; });
+  h += '<tr><td>专项测试费</td><td class="small"><span class="chip">G-04</span> ¥35,000 一次性，单列 ' + (c.testOk ? '<span class="chip green">E1 已确认</span>' : '<button class="btn sm" data-a="testOk" ' + (locked ? 'disabled' : '') + '>以 E1 身份确认</button>') + '</td><td class="num">单列</td><td class="num">—</td><td class="num">—</td></tr>';
+  h += '</tbody></table></div>';
+  h += '<div class="card-b row small"><label>平均年产量 ' + numIn('vol', c.vol, '', '1000') + '</label><label>分摊年数 ' + numIn('years', c.years, c.years < c.life ? 'warn' : '', '1') + '</label><label>制造废品率 % ' + numIn('scrap', c.scrap, '', '0.1') + '</label><label>管理费率 % <span class="mono">' + c.mgmt + '</span><span class="muted">（财务）</span></label><label>利润率 % ' + numIn('profit', c.profit, c.profit < 5 ? 'warn' : '', '0.5') + '</label><label>包装运输 <span class="mono">' + c.pack.toFixed(2) + '</span><span class="muted">（可回收料箱）</span></label></div></div>';
+
+  // 人工判断节点
+  const j1 = c.parts[1].ops[1];
+  h += '<div class="jnode ' + (c.j01.reason.trim() ? 'ok' : '') + '"><div class="row"><span class="chip amber">人工判断节点 J-01</span><b class="small">没做过的工序：激光焊接的节拍</b></div><p class="small">系统建议：最相似的工序 ' + j1.simN + ' 节拍 ' + j1.simCt + ' s × 1.2 = <b class="mono">' + (j1.simCt*1.2).toFixed(1) + ' s</b>（来自暗规则，工艺工程师确认）</p><div class="row small"><label>采用节拍 s ' + (locked ? '<span class="mono">' + c.j01.ct + '</span>' : numIn('j01.ct', c.j01.ct, '', '0.1')) + '</label><label style="flex:1;min-width:200px">理由 <input class="in" style="width:100%" id="j01r" data-c2="j01.reason" value="' + esc(c.j01.reason) + '" placeholder="例如：参考 2023 年支架项目的激光焊试制数据" ' + (locked ? 'disabled' : '') + '></label></div></div>';
+  if(c.buy[0].est && !c.buy[0].arrived){
+    h += '<div class="jnode ' + (c.estReason.trim() ? 'ok' : '') + '"><div class="row"><span class="chip amber">校验 C-06</span><b class="small">轴承还是估价</b></div><p class="small">提交审批前，要么等回价到了更新，要么写明原因。</p><input class="in" style="width:100%" data-c2="estReason" value="' + esc(c.estReason) + '" placeholder="例如：供应商承诺 10-30 前回价，先按估价提交" ' + (locked ? 'disabled' : '') + '></div>';
+  }
+  h += '</div>';
+
+  // 右栏：结果、规则、校验
+  const rows = [['材料费',R.matSum],['加工费',R.procSum],['外购件费',R.buySum],['制造废品',R.scrapSum],['工装分摊',R.toolAlloc],['包装运输',c.pack],['管理费',R.mgmt],['利润',R.profit]];
+  const mx = Math.max.apply(null, rows.map(r => r[1]));
+  h += '<div class="stack" style="min-width:0"><div class="card"><div class="card-b stack"><span class="muted small">单价（每套）</span><span class="price">¥' + fx2(R.final) + '</span>' + (c.ov.on && R.ovPct != null ? '<span class="chip amber">人工覆盖 · 公式结果 ¥' + fx2(R.unit) + '</span>' : '') + '<span class="small muted">年度报价金额约 ¥' + Math.round(R.annual/10000).toLocaleString('zh-CN') + ' 万</span><div class="bd">';
+  rows.forEach(r => { h += '<span class="small">' + r[0] + '</span><span class="bar"><i style="width:' + (r[1]/mx*100) + '%"></i></span><span class="mono small">' + fx2(r[1]) + '</span>'; });
+  h += '</div>';
+  if(!locked){
+    h += '<label class="row small" style="gap:6px"><input type="checkbox" data-a="ovToggle" ' + (c.ov.on ? 'checked' : '') + '>人工覆盖单价（J-04）</label>';
+    if(c.ov.on) h += '<div class="row small"><input class="in num" type="number" step="0.01" data-c="ov.val" value="' + esc(c.ov.val) + '" placeholder="单价"><input class="in" style="flex:1;min-width:140px" data-c2="ov.reason" value="' + esc(c.ov.reason) + '" placeholder="覆盖理由（必填）"></div>';
+  }
+  h += '</div></div>';
+
+  h += '<div class="card"><div class="card-h"><h3>规则</h3></div><div class="card-b">' + R.rules.map(r => '<div class="rule"><span class="code">' + r[0] + '</span><span><b>' + r[1] + '</b><br><span class="' + (r[3] ? '' : 'muted') + '">' + esc(r[2]) + '</span></span></div>').join('') + '</div></div>';
+  h += '<div class="card"><div class="card-h"><h3>校验和审批</h3></div><div class="card-b">';
+  if(!R.flags.length) h += '<div class="rule"><span class="code">OK</span><span class="muted">校验都通过了</span></div>';
+  R.flags.forEach(f => { h += '<div class="rule"><span class="code">' + f.code + '</span><span style="color:' + (f.lv === 'err' ? 'var(--red)' : 'var(--amber)') + '">' + esc(f.t) + '</span></div>'; });
+  const route = approvalRoute(R);
+  h += '<div class="rule"><span class="code">审批</span><span>' + route.map(a => '<span class="chip">' + a.who + '</span>').join(' → ') + (R.appr.length ? '<br><span class="small muted">' + R.appr.map(a => esc(a.why)).join('；') + '</span>' : '<br><span class="small muted">参数都在允许范围内，只需商务主管审批。可以试试把利润率改到 4%，或把某道工序的设备综合效率改到 75%。</span>') + '</span></div>';
+  h += '</div>' + (locked ? '' : '<div class="cbar"><button class="btn primary" data-a="submitAppr" ' + (R.flags.some(f => f.lv === 'err') ? 'disabled' : '') + '>提交审批</button><span class="small muted">' + (R.flags.some(f => f.lv === 'err') ? '先处理红色的校验项' : '可以提交') + '</span></div>') + '</div>';
+  h += '</div></div></div>';
+  return h;
+}
+function approvalRoute(R){
+  const r = [];
+  if(R.appr.some(a => a.who === 'C1')) r.push({who:'C1（成本规则负责人）'});
+  r.push({who:'S1 商务主管'});
+  if(R.appr.some(a => a.who === '工厂领导')) r.push({who:'工厂领导'});
+  return r;
+}
+function tabAppr(q){
+  if(q.st < 6) return '<div class="card-b"><p class="note">成本核算提交审批后，这里会按条件生成审批流。</p></div>';
+  const R = compute(), route = approvalRoute(R);
+  let h = '<div class="card-b stack"><h3>审批</h3><div class="row">' + route.map((a,i) => '<span class="chip ' + (q.st > 6 ? 'green' : '') + '">' + (i+1) + '. ' + a.who + (q.st > 6 ? ' ✓' : '') + '</span>').join(' → ') + '</div><p class="small muted">手机上也能批。单价 ¥' + fx2(R.final) + ' · 利润率 ' + S.cost.profit + '%</p>';
+  if(q.st === 6) h += '<div class="row"><button class="btn primary" data-a="approve">依次批准（演示）</button></div>';
+  h += '</div>';
+  if(q.st >= 7){
+    h += '<div class="card-b stack" style="border-top:1px solid var(--line)"><h3>客户模板</h3><p class="small muted">按客户D 的成本分解模板生成（模板在澄清后由客户补发）。</p><div class="scroll-x"><table class="t"><thead><tr><th>成本项</th><th class="num">金额（元 / 套）</th></tr></thead><tbody>' +
+      [['原材料',R.matSum],['加工',R.procSum],['外购件',R.buySum],['废品',R.scrapSum],['工装分摊',R.toolAlloc],['包装运输',S.cost.pack],['管理费',R.mgmt],['利润',R.profit]].map(r => '<tr><td>' + r[0] + '</td><td class="num">' + fx2(r[1]) + '</td></tr>').join('') +
+      '<tr><td><b>单价</b></td><td class="num"><b>' + fx2(R.final) + '</b></td></tr><tr><td>一次性费用：激光焊工装 / 专项测试</td><td class="num">60,000 / 35,000</td></tr></tbody></table></div>';
+    if(q.st < 9) h += '<div class="row"><button class="btn primary" data-a="resultOpen">登记定点结果</button><span class="small muted">已提交给客户；定点结果一般要几周到几个月才出，原型里直接登记。</span></div>';
+    else h += '<div class="row"><span class="chip ' + (S.result.r === '已定点' ? 'green' : 'amber') + '">' + esc(S.result.r) + '</span>' + (S.result.why ? '<span class="small muted">丢标原因：' + esc(S.result.why) + '</span>' : '') + (S.result.r === '已定点' ? '<button class="btn" data-a="erp">查看 ERP 导入文件</button>' : '') + '</div>';
+    h += '</div>';
+  }
+  return h;
+}
+function tabLog(){
+  if(!S.log.length) return '<div class="card-b"><p class="muted">还没有记录。</p></div>';
+  return '<div class="scroll-x"><table class="t"><thead><tr><th>时间</th><th>谁</th><th>做了什么</th></tr></thead><tbody>' + S.log.map(l => '<tr><td class="mono small">' + l.t + '</td><td>' + (l.who.indexOf('AI') >= 0 ? '<span class="ai">' + esc(l.who) + '</span>' : esc(l.who)) + '</td><td>' + esc(l.what) + '</td></tr>').join('') + '</tbody></table></div><p class="note" style="margin:12px 16px">操作记录只能新增，不能修改和删除。AI 的结果和人的确认分开存。</p>';
+}
+
+/* ---------- 未识别邮件 ---------- */
+function viewMail(){
+  let h = '<div class="stack" style="gap:2px"><h1>未识别邮件</h1><p class="muted small">AI 判断为“其他”的邮件不丢弃，放在这里保留 30 天，商务专员每天扫一眼。</p></div><div class="card">';
+  h += '<div class="card-b stack" style="border-bottom:1px solid var(--line)"><div class="row"><b>Fw: 新项目报价邀请</b><span class="muted small">10-26 17:40 · 客户F 采购部</span><span style="flex:1"></span>' + (S.mailDone ? '<span class="chip green">已转成新询价 Q2610-023</span>' : '<button class="btn primary" data-a="mailFix">转成新询价</button><button class="btn" data-a="mailIgnore">确认无关</button>') + '</div><p class="small">邮件正文只有一句“请查收共享链接里的询价文件”，没有附件，AI 判断不了是不是询价。</p></div>';
+  h += '<div class="card-b row"><b>会议邀请：供应商大会</b><span class="muted small">10-25 09:12</span><span style="flex:1"></span><span class="chip">其他</span></div></div>';
+  return h;
+}
+
+/* ---------- 看板 ---------- */
+function viewOps(){
+  const qs = S.quotes;
+  const open = qs.filter(q => q.st < 9);
+  const red = open.filter(q => q.rem != null && q.rem <= (q.type === '工程变更' ? 1 : 2));
+  const yel = open.filter(q => q.rem != null && !red.includes(q) && q.rem <= (q.type === '工程变更' ? 3 : 5));
+  const stuck = open.filter(q => q.stay > 3 && q.st < 7);
+  let h = '<div class="row"><div class="stack" style="gap:2px;flex:1"><h1>看板 · 运营</h1><p class="muted small">管“今天”：先跟哪几份，卡在谁那里。每 5 分钟刷新。不按个人排名。</p></div><span class="chip">本周新收询价 ' + (S.arrived ? 4 : 3) + ' 份</span></div>';
+  h += '<div class="kpis"><div class="kpi"><span class="small muted">在途报价</span><b>' + open.length + '</b></div><div class="kpi red"><span class="small muted">临期 · 红</span><b>' + red.length + '</b></div><div class="kpi amber"><span class="small muted">临期 · 黄</span><b>' + yel.length + '</b></div><div class="kpi"><span class="small muted">卡住（同一步超过 3 天）</span><b>' + stuck.length + '</b></div></div>';
+  h += '<div class="card"><div class="card-h"><h2>每份报价在哪一步？</h2><span class="muted small">点卡片进入报价单</span></div><div class="kanban">';
+  [0,1,3,4,5,6,7,8].forEach(st => {
+    const items = open.filter(q => q.st === st || (st === 1 && q.st === 2));
+    h += '<div class="col"><div class="col-h"><span>' + (st === 1 ? '待分级 / 解析中' : STATES[st]) + '</span><span class="mono">' + items.length + '</span></div>';
+    items.forEach(q => { const cls = red.includes(q) ? 'r' : (yel.includes(q) ? 'y' : ''); h += '<div class="qc ' + cls + '" data-a="open" data-id="' + q.id + '"><b class="mono">' + q.id + '</b><span>' + esc(q.cust) + ' · ' + q.type + '</span><span class="muted">' + q.owner + (q.rem != null ? ' · 剩 ' + q.rem + ' 天' : '') + (q.stay > 3 && q.st < 7 ? ' · ⏸' + q.stay + ' 天' : '') + '</span></div>'; });
+    h += '</div>';
+  });
+  h += '</div></div>';
+  const follow = open.filter(q => q.rem != null).sort((a,b) => a.rem - b.rem).slice(0,5);
+  h += '<div class="card"><div class="card-h"><h2>今天先跟这几份</h2></div><div class="scroll-x"><table class="t"><tbody>' + follow.map(q => '<tr class="click" data-a="open" data-id="' + q.id + '"><td>' + remChip(q) + '</td><td class="mono">' + q.id + '</td><td>' + esc(q.cust) + ' · ' + esc(q.proj) + '</td><td>' + STATES[q.st] + '</td><td class="mono">' + q.owner + '</td><td>' + (q.stay > 3 && q.st < 7 ? '<span class="chip amber">⏸ 停留 ' + q.stay + ' 天</span>' : '') + '</td></tr>').join('') + '</tbody></table></div></div>';
+  return h;
+}
+function lineChart(o){
+  const W = 520, H = 220, L = 40, Rm = 16, T = 18, B = 30;
+  const xs = i => L + i*(W-L-Rm)/(o.vals.length-1);
+  const ys = v => T + (o.max - v)/(o.max - o.min)*(H-T-B);
+  let s = '<svg class="ch" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(o.title) + '">';
+  o.ticks.forEach(t => { s += '<line class="ax" x1="' + L + '" x2="' + (W-Rm) + '" y1="' + ys(t) + '" y2="' + ys(t) + '"/><text class="lab" x="' + (L-6) + '" y="' + (ys(t)+4) + '" text-anchor="end">' + t + '</text>'; });
+  if(o.base != null) s += '<line class="base" x1="' + L + '" x2="' + (W-Rm) + '" y1="' + ys(o.base) + '" y2="' + ys(o.base) + '"/><text class="lab" x="' + (W-Rm) + '" y="' + (ys(o.base)-5) + '" text-anchor="end">基线 ' + o.base + '</text>';
+  s += '<line class="tgt" x1="' + L + '" x2="' + (W-Rm) + '" y1="' + ys(o.tgt) + '" y2="' + ys(o.tgt) + '"/><text class="lab" x="' + (L+6) + '" y="' + (ys(o.tgt)+(o.tgtBelow ? 14 : -5)) + '" text-anchor="start" style="fill:var(--green)">目标 ' + o.tgt + '</text>';
+  const pts = o.vals.map((v,i) => xs(i) + ',' + ys(v)).join(' ');
+  s += '<polygon class="area" points="' + xs(0) + ',' + ys(o.min) + ' ' + pts + ' ' + xs(o.vals.length-1) + ',' + ys(o.min) + '"/><polyline class="line" points="' + pts + '"/>';
+  o.vals.forEach((v,i) => { const last = i === o.vals.length-1; s += '<circle class="dot" cx="' + xs(i) + '" cy="' + ys(v) + '" r="' + (last ? 4.5 : 3) + '"/><text class="lab" x="' + xs(i) + '" y="' + (H-10) + '" text-anchor="middle">' + o.labels[i] + '</text>'; if(last) s += '<text class="labt" x="' + (xs(i)-8) + '" y="' + (ys(v)-10) + '" text-anchor="end">' + v + o.unit + '</text>'; });
+  return s + '</svg>';
+}
+function barChart(rows, unit, id){
+  const W = 520, rowH = 30, L = 120, Rm = 50, H = rows.length*rowH + 10;
+  const mx = Math.max.apply(null, rows.map(r => r[1]));
+  let s = '<svg class="ch bars" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="条形图">';
+  rows.forEach((r,i) => {
+    const y = 5 + i*rowH, w = r[1]/mx*(W-L-Rm);
+    s += '<text class="labt" x="' + (L-8) + '" y="' + (y+18) + '" text-anchor="end">' + r[0] + '</text><rect class="bar' + (r[2] ? ' warn' : '') + '" x="' + L + '" y="' + (y+6) + '" width="' + w + '" height="16" rx="2"/><text class="lab" x="' + (L+w+6) + '" y="' + (y+18) + '">' + r[1] + unit + '</text>';
+    s += '<rect class="hit" x="0" y="' + y + '" width="' + W + '" height="' + rowH + '" data-a="drill" data-k="' + id + '" data-i="' + i + '"/>';
+  });
+  return s + '</svg>';
+}
+function viewStats(){
+  let h = '<div class="row"><div class="stack" style="gap:2px;flex:1;min-width:220px"><h1>看板 · 统计</h1><p class="muted small">管“这几个月”：快不快、准不准时、时间花在哪。每天刷新。点条形可以看到是哪几份报价。</p></div><select class="in" id="f1"><option>近 6 个月</option></select><select class="in" id="f2"><option>新项目</option><option>工程变更</option></select><select class="in" id="f3"><option>全部客户</option></select></div>';
+  h += '<div class="charts"><div class="card"><div class="card-h"><h2>报价周期</h2><span class="muted small">工作日，中位数 · 收到询价到第一次提交</span></div><div class="card-b">' + lineChart({title:'报价周期',labels:['5月','6月','7月','8月','9月','10月'],vals:[17.2,16.4,15.6,14.8,14.0,13.5],min:10,max:20,ticks:[10,12,14,16,18,20],tgt:12,base:18,unit:' 天',tgtBelow:true}) + '</div></div>';
+  h += '<div class="card"><div class="card-h"><h2>按时提交率</h2><span class="muted small">截止日期以客户最后确认的为准</span></div><div class="card-b">' + lineChart({title:'按时提交率',labels:['5月','6月','7月','8月','9月','10月'],vals:[72,75,79,83,86,88],min:60,max:100,ticks:[60,70,80,90,100],tgt:90,base:70,unit:'%'}) + '</div></div></div>';
+  h += '<div class="card"><div class="card-h"><h2>时间都花在哪个环节？</h2><span class="muted small">新项目，每份平均工作日（9–10 月，6 份）</span></div><div class="card-b">' + barChart([['读规范和澄清',2],['评审和工艺',2.5],['核算',1],['等供应商回价',5,true],['汇总和模板',1],['审批',0.5],['其他',1.5]], ' 天', 'stage') + '<p class="small muted">等供应商回价是剩下最大的一段，下一期建议做供应商报价解析和比价。</p></div></div>';
+  h += '<div class="charts"><div class="card"><div class="card-h"><h2>定点率</h2><span class="muted small">按项目数，近 6 个月滚动</span></div><div class="card-b stack"><span class="price">32%</span><span class="small muted">样本 19 份，仅供观察；定点受价格以外的因素影响很大。</span></div></div>';
+  h += '<div class="card"><div class="card-h"><h2>丢标原因</h2><span class="muted small">可多选，按被选次数</span></div><div class="card-b">' + barChart([['价格偏高',8],['技术方案',3],['交期',2],['其他',1]], ' 次', 'lost') + '</div></div></div>';
+  return h;
+}
+function viewEffect(){
+  const rows = [['要求梳理时间','3 人天','1.2','1.1','ok'],['每份漏项','6 条','≤ 2','1.4（关键 0）','ok'],['成本核算用时','5 人天','≈ 3.3','3.2','ok'],['相似件核算差异','9%','≤ 3%','1.2%','ok'],['报价周期','18 天','≈ 12','13.5','near'],['按时提交率','70%','≥ 90%','88%','near'],['每月释放工时','—','25–30 人天','≈ 24（估算）','near']];
+  let h = '<div class="row"><div class="stack" style="gap:2px;flex:1;min-width:220px"><h1>看板 · 效果</h1><p class="muted small">管“和以前比”。每月刷新，可以导出成月度汇报的一页纸。</p></div><button class="btn" data-a="monthly">导出月报一页纸</button></div>';
+  h += '<div class="card"><div class="card-h"><h2>和上线前比</h2><span class="muted small">2026 年 10 月</span></div><div class="scroll-x"><table class="t eff"><thead><tr><th>指标</th><th>基线</th><th>目标</th><th>现在</th><th></th></tr></thead><tbody>' + rows.map(r => '<tr><td>' + r[0] + '</td><td class="mono">' + r[1] + '</td><td class="mono">' + r[2] + '</td><td class="mono ' + r[4] + '">' + r[3] + '</td><td class="' + r[4] + '">' + (r[4] === 'ok' ? '✓ 达到' : '△ 接近') + '</td></tr>').join('') + '</tbody></table></div><p class="note" style="margin:12px 16px">基线主要来自访谈和跟岗估算，现在的数字来自系统记录，口径不完全一样。</p></div>';
+  h += '<div class="kpis"><div class="kpi"><span class="small muted">人工补充率（AI 漏的）</span><b>3.8%</b></div><div class="kpi"><span class="small muted">分级建议采纳</span><b>74%</b></div><div class="kpi"><span class="small muted">澄清条目采纳</span><b>63%</b></div><div class="kpi"><span class="small muted">相似项目采纳</span><b>85%</b></div></div>';
+  return h;
+}
+
+/* ---------- 渲染 ---------- */
+function main(){
+  if(S.view === 'list') return viewList();
+  if(S.view === 'draft') return viewDraft();
+  if(S.view === 'detail') return viewDetail();
+  if(S.view === 'mail') return viewMail();
+  if(S.view === 'ops') return viewOps();
+  if(S.view === 'stats') return viewStats();
+  if(S.view === 'effect') return viewEffect();
+  return '';
+}
+function render(){
+  const keep = {};
+  ['specPane','reqPane'].forEach(id => { const el = document.getElementById(id); if(el) keep[id] = el.scrollTop; });
+  $('#tour').innerHTML = tourHTML();
+  $('#nav').innerHTML = navHTML();
+  $('#main').innerHTML = main();
+  Object.keys(keep).forEach(id => { const el = document.getElementById(id); if(el) el.scrollTop = keep[id]; });
+  $('#modal').innerHTML = S.modal ? modalHTML() : '';
+}
+function toast(t){ const el = $('#toast'); el.className = 'toast'; el.textContent = t; el.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => { el.hidden = true; }, 2600); }
+function go(v){ S.view = v; if(v === 'ops' || v === 'stats' || v === 'effect'){ if(v === 'ops' || S.done.appr) mark('board'); } render(); window.scrollTo({top:0}); }
+function open24(tab){
+  if(!S.arrived){ go('list'); toast('先点“模拟收到一封新询价”'); return; }
+  const q = q24();
+  S.sel = q.id;
+  if(q.st <= 2){ S.view = 'draft'; }
+  else { S.view = 'detail'; if(tab) S.tab = tab; }
+  render(); window.scrollTo({top:0});
+}
+
+/* ---------- 弹窗 ---------- */
+function modalHTML(){
+  const m = S.modal;
+  return '<div class="modal-bg" data-a="modalBg"><div class="modal" role="dialog" aria-modal="true"><div class="card-h"><h2>' + esc(m.title) + '</h2><span style="flex:1"></span><button class="btn sm" data-a="modalClose">关闭</button></div><div class="card-b stack">' + m.body + '</div>' + (m.foot ? '<div class="cbar">' + m.foot + '</div>' : '') + '</div></div>';
+}
+function clarText(){
+  const ok = S.clars.filter(c => c.st === 'ok' || c.st === 'edited');
+  if(!ok.length) return '（还没有采纳的条目）';
+  return 'RFQ X1 Steering Column – Clarification list (Q2610-024)\n\n' + ok.map((c,i) => (i+1) + '. [' + (c.kind === '可能偏差' ? 'Deviation' : 'Clarification') + '] ' + c.ask + '\n   中文备注：' + c.q).join('\n\n');
+}
+function copyPre(){
+  const pre = $('#modalPre'); if(!pre) return;
+  const txt = pre.textContent;
+  const sel = () => { const r = document.createRange(); r.selectNodeContents(pre); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); };
+  try { navigator.clipboard.writeText(txt).then(() => toast('已复制'), () => { sel(); toast('已选中文字，按 Ctrl/⌘ + C 复制'); }); } catch(e){ sel(); toast('已选中文字，按 Ctrl/⌘ + C 复制'); }
+}
+
+/* ---------- 动作 ---------- */
+const A = {
+  reset(){ fresh(); render(); toast('已重新开始'); },
+  tourToggle(){ S.tourOpen = !S.tourOpen; render(); },
+  tourGo(d){ const s = TOUR.find(x => x.k === d.k); if(s) s.go(); },
+  go(d){ go(d.v); },
+  arrive(){
+    if(S.arrived) return;
+    S.arrived = true; S.quotes.unshift(Object.assign({}, NEWQ));
+    log('系统 · AI','收到询价邮件，识别为新询价，生成报价单草稿 Q2610-024'); mark('arrive');
+    toast('收到客户D 的询价邮件，已生成报价单草稿'); render();
+  },
+  open(d){ if(d.id === 'Q2610-024'){ open24(); return; } S.sel = d.id; S.view = 'detail'; render(); window.scrollTo({top:0}); },
+  draftCk(d, el){ S.draft[d.k] = el.checked; render(); },
+  confirmReg(){
+    const v = $('#dueVal'); if(v) S.draft.dueVal = v.value;
+    setSt(1); log('S2','确认登记：客户D，截止日期 ' + S.draft.dueVal); mark('reg'); render();
+  },
+  gradeMode(d){ S.grade.mode = d.m; render(); },
+  gradeOk(d){
+    const q = q24();
+    if(d.m === 'edit'){ q.type = $('#gType').value; q.pri = $('#gPri').value; log('S1','修改分级：' + q.type + ' · 优先级 ' + q.pri + '（' + $('#gWhy').value + '）'); }
+    else log('S1','采纳 AI 分级建议：新项目 · 优先级 高');
+    mark('grade'); setSt(2); S.parseStep = 0; render(); runParse();
+  },
+  reqSel(d, el, e){
+    if(e.target.closest('button')) return;
+    S.act = d.id; const r = S.reqs.find(x => x.id === d.id); render();
+    if(r && r.st === 'suspect'){ toast('这条要求的原文在文件里找不到，系统标成了“可疑”'); return; }
+    const seg = document.getElementById('seg' + d.id), pane = document.getElementById('specPane');
+    if(seg && pane){ pane.scrollTop = seg.closest('.page').offsetTop - 40; }
+  },
+  reqOk(d){ const r = S.reqs.find(x => x.id === d.id); r.st = 'ok'; log('S2','确认要求 ' + r.id + (r.key ? '（关键）' : '')); checkReqDone(); render(); },
+  reqDel(d){ const r = S.reqs.find(x => x.id === d.id); r.prev = r.st; r.st = 'deleted'; log('S2','删除要求 ' + r.id); checkReqDone(); render(); },
+  reqUndo(d){ const r = S.reqs.find(x => x.id === d.id); r.st = r.prev === 'suspect' ? 'suspect' : 'pending'; render(); },
+  reqFix(d){ const r = S.reqs.find(x => x.id === d.id); r.sum = r.fix; r.st = 'edited'; r.suspect = false; S.act = r.id; log('S2','按原文改正可疑条目 ' + r.id + '：720 h → 480 h'); checkReqDone(); render(); toast('已按第 44 页原文改正'); },
+  grpOk(d){ const n = S.reqs.filter(r => r.cat === d.c && r.st === 'pending' && !r.key); n.forEach(r => r.st = 'ok'); log('S2','整组确认 ' + d.c + ' 的非关键要求 ' + n.length + ' 条'); checkReqDone(); render(); },
+  trans(d, el){ S.trans = el.checked; render(); },
+  tab(d){ S.tab = d.t; render(); },
+  ckAct(d){
+    const c = S.checks.find(x => x.id === d.id);
+    if(d.v === 'file'){
+      const opts = ['物流说明.pdf 第 3 页','物流说明.pdf 第 4 页','RFQ letter.pdf 第 2 页'];
+      S.modal = {title:'补上原文位置 · ' + c.name, body:'<p class="small muted">在哪个文件、哪一页找到的？</p><select class="in" id="ckFile">' + opts.map(o => '<option>' + o + '</option>').join('') + '</select>', foot:'<button class="btn primary" data-a="ckFileOk" data-id="' + c.id + '">保存</button>'};
+    } else if(d.v === 'na'){
+      S.modal = {title:'标为不适用 · ' + c.name, body:'<p class="small muted">选一个原因：</p><select class="in" id="ckNa"><option>这份询价是机械转向管柱，不含电控单元</option><option>询价范围不含这类零件</option><option>其他（在备注里说明）</option></select>', foot:'<button class="btn primary" data-a="ckNaOk" data-id="' + c.id + '">保存</button>'};
+    } else {
+      c.act = 'none';
+      S.clars.push({id:'C' + (S.clars.length+1), kind:'需澄清', reqs:'关键要求检查', q:'规范没有写“' + c.name + '”的要求' + (c.name === '湿热试验' ? '（第 43 页只写“见项目专用附件（待发布）”）' : '') + '，请客户确认。', ask: c.name === '湿热试验' ? 'The humidity requirements refer to a project-specific annex that was not included. Please provide the annex or confirm the applicable damp-heat test.' : 'Please confirm the requirement for: ' + c.name + '.', owner:'商务', st:'pending', edit:false, from:true});
+      log('S2','关键要求“' + c.name + '”确实没有，加入澄清清单'); checkCheckDone(); toast('已加入澄清清单');
+    }
+    render();
+  },
+  ckFileOk(d){ const c = S.checks.find(x => x.id === d.id); c.act = 'file'; c.why = $('#ckFile').value; log('S2','关键要求“' + c.name + '”在 ' + c.why + ' 找到，补上位置'); S.modal = null; checkCheckDone(); render(); },
+  ckNaOk(d){ const c = S.checks.find(x => x.id === d.id); c.act = 'na'; c.why = $('#ckNa').value; log('S2','关键要求“' + c.name + '”标为不适用：' + c.why); S.modal = null; checkCheckDone(); render(); },
+  clOk(d){ const c = S.clars.find(x => x.id === d.id); c.st = 'ok'; log(c.owner === '产品工程' ? 'E1' : 'S2','采纳 ' + c.id); checkClarDone(); render(); },
+  clDel(d){ const c = S.clars.find(x => x.id === d.id); c.st = 'deleted'; log(c.owner === '产品工程' ? 'E1' : 'S2','删除 ' + c.id); checkClarDone(); render(); },
+  clUndo(d){ const c = S.clars.find(x => x.id === d.id); c.st = 'pending'; render(); },
+  clEdit(d){ const c = S.clars.find(x => x.id === d.id); c.edit = true; render(); const t = document.getElementById('clTxt' + c.id); if(t) t.focus(); },
+  clSave(d){ const c = S.clars.find(x => x.id === d.id); const t = document.getElementById('clTxt' + c.id); if(t) c.q = t.value; c.edit = false; c.st = 'edited'; log(c.owner === '产品工程' ? 'E1' : 'S2','修改后采纳 ' + c.id); checkClarDone(); render(); },
+  exportClar(){ S.modal = {title:'澄清清单（预览）', body:'<p class="small muted">系统不直接发给客户。复制后由商务专员自己发。</p><pre id="modalPre">' + esc(clarText()) + '</pre>', foot:'<button class="btn primary" data-a="copy">复制</button>'}; mark('clar'); render(); },
+  copy(){ copyPre(); },
+  dSel(d, el, e){ if(e.target.closest('button,input')) return; S.dsel = d.id; mark('draw'); render(); },
+  dEdit(d){ const x = S.draw.find(v => v.id === d.id); x.edit = true; S.dsel = d.id; render(); const i = document.getElementById('dv' + d.id); if(i){ i.value = x.right; i.focus(); i.select(); } },
+  dSave(d){ const x = S.draw.find(v => v.id === d.id); const i = document.getElementById('dv' + d.id); x.val = i ? i.value : x.val; x.edit = false; x.st = 'fixed'; log('S2','改正图纸字段“' + x.name + '”：' + x.ai + ' → ' + x.val); mark('draw'); render(); },
+  toReview(){ setSt(4); S.tab = 'review'; mark('req'); mark('check'); log('S2','要求清单和关键要求检查全部确认，提交技术评审'); render(); },
+  concl(d, el){ S.review.concl = el.value; render(); },
+  dev(d, el){ S.review.devs[d.id] = el.checked; },
+  reviewOk(){ const t = $('#revTxt'); S.review.text = t ? t.value : ''; setSt(5); S.tab = 'cost'; mark('review'); log('E1','提交评审意见：' + S.review.concl); render(); window.scrollTo({top:0}); },
+  simPick(d){ S.cost.sim = d.id; const s = SIMS.find(x => x.id === d.id); log('C3','参考相似项目：' + s.y + ' ' + s.cust + ' ' + s.name); render(); },
+  quoteArrive(){ const b = S.cost.buy[0]; b.arrived = true; S.cost.changed = ['B1']; log('P1','轴承供应商回价 7.60 元，替换估价 7.14 元'); render(); toast('回价已更新，变化的行已高亮'); setTimeout(() => { S.cost.changed = []; }, 3500); },
+  testOk(){ S.cost.testOk = true; log('E1','确认专项测试费 35,000 元（G-04）'); render(); },
+  ovToggle(d, el){ S.cost.ov.on = el.checked; render(); },
+  submitAppr(){ const R = compute(); if(R.flags.some(f => f.lv === 'err')) return; setSt(6); S.tab = 'appr'; mark('cost'); log('C3','提交审批：单价 ¥' + fx2(R.final) + '，按本体 v1.1 锁定'); render(); window.scrollTo({top:0}); },
+  approve(){ const R = compute(); approvalRoute(R).forEach(a => log(a.who,'审批通过')); setSt(7); log('系统','按客户D 模板生成报价单和成本分解表'); render(); },
+  resultOpen(){ S.modal = {title:'登记定点结果', body:'<label class="stack small"><span class="muted">结果</span><select class="in" id="resR"><option>已定点</option><option>丢标</option><option>客户取消</option><option>我方放弃</option></select></label><div class="stack small"><span class="muted">丢标原因（结果为“丢标”时必选，可多选）</span>' + ['价格偏高','技术方案','交期','客户关系','其他'].map(r => '<label class="row" style="gap:6px"><input type="checkbox" class="lostWhy" value="' + r + '">' + r + '</label>').join('') + '</div>', foot:'<button class="btn primary" data-a="resultOk">保存</button><span class="small muted" id="resErr"></span>'}; render(); },
+  resultOk(){
+    const r = $('#resR').value; const why = Array.prototype.slice.call(document.querySelectorAll('.lostWhy:checked')).map(x => x.value);
+    if(r === '丢标' && !why.length){ $('#resErr').textContent = '丢标时必须选原因'; return; }
+    S.result = {r, why: why.join('、')}; const q = q24(); q.st = 9; q.result = r; q.rem = null; q.due = '—';
+    log('S2','登记定点结果：' + r + (why.length ? '（' + why.join('、') + '）' : '')); mark('appr'); S.modal = null; render();
+    toast(r === '已定点' ? '已定点，可以查看 ERP 导入文件' : '已登记，丢标原因会进统计看板');
+  },
+  erp(){
+    const R = compute();
+    const txt = 'project_no,customer,program,part_no,description,unit_price_cny,annual_volume,sop,lifetime_years\nQ2610-024,客户D,X1,D-SC-ASSY-01,转向管柱总成,' + R.final.toFixed(2) + ',' + S.cost.vol + ',2028-03,' + S.cost.life;
+    S.modal = {title:'ERP 导入文件（预览）', body:'<p class="small muted">按 ERP 现有的导入格式生成，放到约定目录，由 ERP 每天定时导入；正式接口等 IT 排期。</p><pre id="modalPre">' + esc(txt) + '</pre>', foot:'<button class="btn primary" data-a="copy">复制</button>'}; render();
+  },
+  monthly(){
+    const txt = 'RFQ 智能报价平台 · 2026 年 10 月月报（示例）\n\n本月进展：系统交接 IT 后运行稳定；第二次季度模型复评进行中。\n关键指标（和基线比）：要求梳理 3 → 1.1 人天；漏项 6 → 1.4 条，关键要求不漏；报价周期 18 → 13.5 个工作日；按时提交率 70% → 88%。\n一个例子：某份 RFQ，系统在附件里找出了可回收料箱的要求，避免了一次补报。\n需要支持：下一期做供应商报价解析，需要采购 P1 配合调研。\n下月计划：完成季度复评；补齐 2 家客户模板。\n致谢：S1、C1 和 IT 的 T1。';
+    S.modal = {title:'月报一页纸（预览）', body:'<pre id="modalPre">' + esc(txt) + '</pre>', foot:'<button class="btn primary" data-a="copy">复制</button>'}; render();
+  },
+  drill(d){
+    const map = {stage:['Q2609-031','Q2609-027','Q2610-006','Q2610-012','Q2610-015','Q2610-021'], lost:['Q2605-014','Q2606-022','Q2607-009','Q2608-017']};
+    const label = d.k === 'stage' ? ['读规范和澄清','评审和工艺','核算','等供应商回价','汇总和模板','审批','其他'][+d.i] : ['价格偏高','技术方案','交期','其他'][+d.i];
+    S.modal = {title:'下钻：' + label, body:'<p class="small muted">这个数字由下面这些报价单算出来（原型示例）：</p><div class="row">' + map[d.k].map(x => '<span class="chip mono">' + x + '</span>').join('') + '</div>'}; render();
+  },
+  mailFix(){ S.mailDone = true; log('S2','把未识别邮件“Fw: 新项目报价邀请”转成新询价'); render(); toast('已转成新询价。原型里只演示到这一步'); },
+  mailIgnore(){ S.mailDone = true; render(); },
+  modalClose(){ S.modal = null; render(); },
+  modalBg(d, el, e){ if(e.target === el){ S.modal = null; render(); } }
+};
+function checkReqDone(){ if(!pendingReqs()) toast('要求清单都确认完了'); }
+function checkCheckDone(){ if(!pendingChecks()){ mark('check'); toast('6 个“没找到”都处理完了'); } }
+function checkClarDone(){ if(!pendingClars()) mark('clar'); }
+function runParse(){
+  const t = setInterval(() => {
+    const q = q24();
+    if(!q || q.st !== 2){ clearInterval(t); return; }
+    S.parseStep++;
+    if(S.parseStep >= PARSE.length){
+      clearInterval(t); setSt(3); log('系统 · AI','解析完成：要求 16 条（原型节选），关键要求找到 34 项、没找到 6 项，起草澄清 7 条，图纸字段 8 个');
+      S.view = 'detail'; S.sel = 'Q2610-024'; S.tab = 'req'; render(); window.scrollTo({top:0}); toast('解析完成，请确认要求清单');
+      return;
+    }
+    if(S.view === 'draft') render();
+  }, 380);
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]');
+  if(!el) return;
+  const fn = A[el.dataset.a];
+  if(!fn) return;
+  if(el.tagName === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio')) return;
+  fn(el.dataset, el, e);
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if(el.dataset && el.dataset.a && (el.type === 'checkbox' || el.type === 'radio')){ const fn = A[el.dataset.a]; if(fn) fn(el.dataset, el, e); return; }
+  if(el.dataset && el.dataset.c){
+    const path = el.dataset.c.split('.'); let o = S.cost;
+    for(let i = 0; i < path.length-1; i++) o = o[path[i]];
+    const k = path[path.length-1];
+    o[k] = k === 'val' ? el.value : (parseFloat(el.value) || 0);
+    render();
+  }
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if(el.dataset && el.dataset.c2){
+    const path = el.dataset.c2.split('.'); let o = S.cost;
+    for(let i = 0; i < path.length-1; i++) o = o[path[i]];
+    o[path[path.length-1]] = el.value;
+  }
+});
+document.addEventListener('focusout', e => {
+  const el = e.target;
+  if(el.dataset && el.dataset.c2) render();
+});
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && S.modal){ S.modal = null; render(); } });
+
+render();
+})();
+</script>
